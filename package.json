@@ -1,9 +1,10 @@
 {
   "name": "treasure-dive",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
+  "homepage": "https://treasure-dive.articles.media",
   "scripts": {
-    "dev": "next dev --turbopack -p 3024",
+    "dev": "next dev -p 3024",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -11,31 +12,32 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@mui/icons-material": "^7.2.0",
-    "@mui/material": "^7.2.0",
-    "@mui/material-nextjs": "^7.2.0",
+    "@mui/icons-material": "^7.3.6",
+    "@mui/material": "^7.3.6",
+    "@mui/material-nextjs": "^7.3.6",
     "@react-three/cannon": "^6.6.0",
     "@react-three/drei": "^10.5.0",
     "@react-three/fiber": "^9.2.0",
-    "axios": "^1.11.0",
+    "axios": "^1.13.2",
     "bootstrap": "^5.3.7",
     "classnames": "^2.5.1",
     "date-fns": "^4.1.0",
-    "next": "^15.5.3",
+    "next": "^16",
     "nipplejs": "^0.10.2",
-    "react": "^19.0.0",
+    "react": "^19",
     "react-bootstrap": "^2.10.10",
     "react-countdown": "^2.3.6",
-    "react-dom": "^19.0.0",
+    "react-dom": "^19",
     "react-hotkeys-hook": "^5.1.0",
-    "sass": "^1.92.1",
+    "sass": "^1.94.2",
     "socket.io-client": "^4.8.1",
-    "swr": "^2.3.6",
-    "three": "^0.178.0"
+    "swr": "^2.3.7",
+    "three": "^0.178.0",
+    "zustand": "^5.0.9"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "eslint": "^9",
-    "eslint-config-next": "15.5.3"
+    "eslint-config-next": "^16"
   }
 }
