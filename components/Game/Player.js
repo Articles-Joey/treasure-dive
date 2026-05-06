@@ -15,12 +15,12 @@ import { useLocalStorageNew } from "@/hooks/useLocalStorageNew"
 
 import { Model as SpacesuitModel } from "@/components/Models/Spacesuit";
 import { degToRad } from "three/src/math/MathUtils.js"
-import { useHotkeys } from "react-hotkeys-hook"
 import { HeldChest } from "@/components/Game/HeldChest"
 import { useKeyboard } from "@/hooks/useKeyboard"
 
 const JUMP_FORCE = 6;
 const SPEED = 4;
+const ROTATION_SPEED = 2; // degrees per frame
 
 let lastLocation
 
@@ -116,7 +116,7 @@ function PlayerBase(props) {
 
             if (e?.body.userData.isEnemy) {
                 console.log("Enemy collision")
-                setHoldingChest(false)
+                onEnemyCollisionRef.current?.()
             }
 
             if (e?.body.userData.isChest) {
@@ -140,15 +140,16 @@ function PlayerBase(props) {
 
     const pos = useRef([0, 0, 0])
     const playerModelRef = useRef()
+    const stunnedRef = useRef(false)
+    const stunTimeoutRef = useRef(null)
+    const onEnemyCollisionRef = useRef(null)
+    const rollYOffsetRef = useRef(0)
+    const rollYTargetRef = useRef(0)
     useEffect(() => {
 
         const unsubscribe = api.position.subscribe((p) => {
 
             pos.current = p
-
-            if (playerModelRef.current) {
-                playerModelRef.current.position.set(...p);
-            }
 
             // if (p[1] > 0) {
             //     console.log("Player has surfaced", holdingChest)
@@ -187,6 +188,7 @@ function PlayerBase(props) {
     const [action, setAction] = useState("Idle")
     useEffect(() => {
 
+        if (stunnedRef.current) return;
         if (moveForward || moveRight || moveLeft) {
             setAction("Run");
         } else {
@@ -195,7 +197,34 @@ function PlayerBase(props) {
 
     }, [moveForward, moveRight, moveLeft])
 
-    useFrame(() => {
+    useFrame((state, delta) => {
+
+        // Lerp roll Y offset and update model position along player's local up axis
+        rollYOffsetRef.current = THREE.MathUtils.lerp(rollYOffsetRef.current, rollYTargetRef.current, delta * 8);
+        if (playerModelRef.current) {
+            const rad = degToRad(rotationRef.current);
+            playerModelRef.current.position.set(
+                pos.current[0] + (-Math.sin(rad)) * rollYOffsetRef.current,
+                pos.current[1] + Math.cos(rad) * rollYOffsetRef.current,
+                pos.current[2]
+            );
+        }
+
+        // Smooth rotation — independent of forward movement
+        if (!stunnedRef.current) {
+            if (moveLeft) {
+                rotationRef.current = (rotationRef.current + ROTATION_SPEED) % 360;
+                if (playerModelRef.current) {
+                    playerModelRef.current.rotation.z = degToRad(rotationRef.current);
+                }
+            }
+            if (moveRight) {
+                rotationRef.current = ((rotationRef.current - ROTATION_SPEED) + 360) % 360;
+                if (playerModelRef.current) {
+                    playerModelRef.current.rotation.z = degToRad(rotationRef.current);
+                }
+            }
+        }
 
         // addDistance(0.1)
 
@@ -244,11 +273,11 @@ function PlayerBase(props) {
         //     setMaxHeight(pos.current[1].toFixed(2))
         // }
 
-        if (moveForward) {
+        if (!stunnedRef.current && moveForward) {
             const direction = new Vector3()
             const moveSpeed = SPEED * (shift ? 2 : 0.5);
 
-            const rad = degToRad(rotation);
+            const rad = degToRad(rotationRef.current);
 
             // Calculate the direction vector based on rotation
             direction.set(
@@ -315,34 +344,59 @@ function PlayerBase(props) {
 
     })
 
+    const playHitSound = () => {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(ctx.destination);
+            oscillator.type = 'sawtooth';
+            oscillator.frequency.setValueAtTime(150, ctx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.3);
+            gainNode.gain.setValueAtTime(0.4, ctx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+            oscillator.start(ctx.currentTime);
+            oscillator.stop(ctx.currentTime + 0.3);
+        } catch (e) {}
+    };
+
+    onEnemyCollisionRef.current = () => {
+        if (stunnedRef.current) return;
+        setHoldingChest(false);
+        setAction("Roll");
+        stunnedRef.current = true;
+        rollYTargetRef.current = -0.3;
+        playHitSound();
+        if (stunTimeoutRef.current) clearTimeout(stunTimeoutRef.current);
+        stunTimeoutRef.current = setTimeout(() => {
+            stunnedRef.current = false;
+            rollYTargetRef.current = 0;
+            setAction("Idle");
+        }, 1000);
+    };
+
+    useEffect(() => {
+        return () => {
+            if (stunTimeoutRef.current) clearTimeout(stunTimeoutRef.current);
+        };
+    }, []);
+
     const rotationRef = useRef(rotation);
     useEffect(() => {
         rotationRef.current = rotation;
+        if (playerModelRef.current) {
+            playerModelRef.current.rotation.z = degToRad(rotation);
+        }
     }, [rotation]);
 
-    useHotkeys(['Left', 'A'], () => {
-        console.log("test", rotationRef.current)
-        if (rotationRef.current >= 360) {
-            setRotation(0)
-            return
-        }
-        setRotation(rotationRef.current + 5)
-    });
-    useHotkeys(['Right', 'D'], () => {
-        console.log("test", rotationRef.current)
-        if (rotationRef.current <= 0) {
-            setRotation(360)
-            return
-        }
-        setRotation(rotationRef.current - 5)
-    });
+
 
     return (
         <group>
 
             <group
                 ref={playerModelRef}
-                rotation={[0, 0, degToRad(rotation)]}
             >
                 <SpacesuitModel
                     rotation={[degToRad(180), degToRad(180), 0]}

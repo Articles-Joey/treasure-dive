@@ -1,7 +1,7 @@
 import LobbyPage from "."
 
 export const metadata = {
-    title: `Treasure Dive Lobby`,
+    title: `${process.env.NEXT_PUBLIC_GAME_NAME} Lobby`,
 }
 
 export default function Home() {

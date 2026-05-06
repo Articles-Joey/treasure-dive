@@ -10,14 +10,14 @@ import { useSocketStore } from "@/hooks/useSocketStore";
 import { useGameStore } from "@/hooks/useGameStore";
 import { Dropdown, DropdownButton } from "react-bootstrap";
 
+import GameMenuPrimaryButtonGroup from '@articles-media/articles-dev-box/GameMenuPrimaryButtonGroup';
+import { useStore } from "@/hooks/useStore";
+import Minimap from "./Minimap";
+import DebugPanel from "./DebugPanel";
+
 function LeftPanelContent(props) {
 
-    const {
-        isFullscreen,
-        requestFullscreen,
-        exitFullscreen,
-        reloadScene
-    } = props;
+    const reloadScene = useStore(state => state.reloadScene)
 
     const {
         socket,
@@ -25,29 +25,31 @@ function LeftPanelContent(props) {
         socket: state.socket,
     }));
 
-    const {
-        rotation,
-        setRotation,
-        playerLocation,
-        holdingChest,
-        score,
-        setScore,
-        debug,
-        setDebug,
-        cameraMode, 
-        setCameraMode,
-    } = useGameStore(state => ({
-        rotation: state.rotation,
-        setRotation: state.setRotation,
-        playerLocation: state.playerLocation,
-        holdingChest: state.holdingChest,
-        score: state.score,
-        setScore: state.setScore,
-        debug: state.debug,
-        setDebug: state.setDebug,
-        cameraMode: state.cameraMode,
-        setCameraMode: state.setCameraMode,
-    }));
+    // const {
+    //     setScore,
+    //     debug,
+    //     setDebug,
+    //     cameraMode,
+    //     setCameraMode,
+    // } = useGameStore(state => ({
+    //     rotation: state.rotation,
+    //     setRotation: state.setRotation,
+    //     playerLocation: state.playerLocation,
+    //     holdingChest: state.holdingChest,
+    //     score: state.score,
+    //     setScore: state.setScore,
+    //     debug: state.debug,
+    //     setDebug: state.setDebug,
+    //     cameraMode: state.cameraMode,
+    //     setCameraMode: state.setCameraMode,
+    // }));
+
+    const debug = useStore(state => state.debug)
+    const setDebug = useStore(state => state.setDebug)
+
+    const setScore = useGameStore(state => state.setScore)
+    const cameraMode = useGameStore(state => state.cameraMode)
+    const setCameraMode = useGameStore(state => state.setCameraMode)
 
     return (
         <div className='w-100'>
@@ -56,35 +58,12 @@ function LeftPanelContent(props) {
 
                 <div className="card-body d-flex flex-wrap">
 
-                    <Link
-                        href={'/'}
-                        className="w-50"
-                    >
-                        <ArticlesButton
-                            className='w-100'
-                            small
-                        >
-                            <i className="fad fa-arrow-alt-square-left"></i>
-                            <span>Leave Game</span>
-                        </ArticlesButton>
-                    </Link>
+                    <GameMenuPrimaryButtonGroup
+                        useStore={useStore}
+                        type="GameMenu"
+                    />
 
-                    <ArticlesButton
-                        small
-                        className="w-50"
-                        active={isFullscreen}
-                        onClick={() => {
-                            if (isFullscreen) {
-                                exitFullscreen()
-                            } else {
-                                requestFullscreen('treasure-dive-game-page')
-                            }
-                        }}
-                    >
-                        {isFullscreen && <span>Exit </span>}
-                        {!isFullscreen && <span><i className='fad fa-expand'></i></span>}
-                        <span>Fullscreen</span>
-                    </ArticlesButton>
+                    <div className='w-100 p-1'></div>
 
                     <ArticlesButton
                         size="sm"
@@ -196,46 +175,10 @@ function LeftPanelContent(props) {
             </div>
 
             {/* Minimap */}
-            <div className="card card-articles card-sm">
-
-                <img
-                    src={`${process.env.NEXT_PUBLIC_CDN}games/Treasure Dive/treasure-dive-toontown-map.jpg`}
-                    alt=""
-                    className="img-fluid mx-auto"
-                    width={200}
-                />
-
-            </div>
+            <Minimap />
 
             {/* Debug */}
-            <div className="card card-articles card-sm">
-
-                <div className="card-body">
-
-                    <div>Debug Info</div>
-
-                    <div>
-                        Rotation: {rotation}
-                    </div>
-
-                    <div>
-                        Depth: {playerLocation.y}
-                    </div>
-
-                    <div>
-                        Score: {score}
-                    </div>
-
-                    <div>
-                        Holding Chest: {holdingChest === false ? 'No' : `Yes - ${holdingChest}`}
-                    </div>
-
-                    {/* <div>
-                        XYZ: {JSON.stringify(playerLocation)}
-                    </div> */}
-
-                </div>
-            </div>
+            {debug && <DebugPanel />}
 
         </div>
     )

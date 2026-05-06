@@ -1,7 +1,7 @@
 import { createContext, createRef, forwardRef, memo, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber"
-import { Sky, useDetectGPU, useTexture, OrbitControls, Cylinder, QuadraticBezierLine, Text } from "@react-three/drei";
+import { Sky, useDetectGPU, useTexture, OrbitControls, Cylinder, QuadraticBezierLine, Text, Stats } from "@react-three/drei";
 
 import { NearestFilter, RepeatWrapping, TextureLoader, Vector3 } from "three";
 
@@ -15,16 +15,17 @@ import PlayerBase from "./Player";
 import Obstacles from "./Obstacles";
 import Chests from "./Chests";
 import { useGameStore } from "@/hooks/useGameStore";
+import { useStore } from "@/hooks/useStore";
+import { ModelDonaldsBoat } from "../Models/DonaldsBoat";
 
 function GameCanvas(props) {
 
     const gameHeight = 30
 
-    const {
-        debug,
-    } = useGameStore(state => ({
-        debug: state.debug,
-    }));
+    const debug = useStore(state => state.debug)
+
+    const showStats = useStore((state) => state?.debugConfig?.showStats);
+    const toontownMode = useStore(state => state.toontownMode)
 
     let gameContent = (
         <>
@@ -70,6 +71,10 @@ function GameCanvas(props) {
     return (
         <Canvas camera={{ position: [0, 0, 10], fov: 50 }}>
 
+            {showStats && <>
+                <Stats className="stats-overlay" />
+            </>}
+
             <OrbitControls
             // autoRotate={gameState?.status == 'In Lobby'}
             />
@@ -81,10 +86,21 @@ function GameCanvas(props) {
             <ambientLight intensity={1} />
             <spotLight intensity={30000} position={[-50, 100, 50]} angle={5} penumbra={1} />
 
-            <ModelKennyNLPirateShipDark
-                position={[0, -0.5, 2.75]}
-                rotation={[0, degToRad(90), 0]}
-            />
+            {toontownMode ?
+                <>
+                    <ModelDonaldsBoat 
+                        rotation={[0, degToRad(90), 0]}
+                        position={[0.5, 0.25, 0]}
+                    />
+                </>
+                :
+                <>
+                    <ModelKennyNLPirateShipDark
+                        position={[-0, -0.25, 0]}
+                        rotation={[0, degToRad(90), 0]}
+                    />
+                </>
+            }
 
             <group
                 position={[0, -25, 0]}
@@ -174,11 +190,7 @@ function Surface({ position }) {
         }
     }))
 
-    const {
-        debug,
-    } = useGameStore(state => ({
-        debug: state.debug,
-    }));
+    const debug = useStore(state => state.debug)
 
     return (
         <mesh ref={ref} castShadow position={position}>

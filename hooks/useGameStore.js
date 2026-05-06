@@ -78,6 +78,13 @@ export const useGameStore = create((set) => ({
         }))
     },
 
+    totalDistance: 0,
+    setTotalDistance: (newValue) => {
+        set((prev) => ({
+            totalDistance: newValue
+        }))
+    },
+
     chests: [
         {
             position: [-5, -2, 0],

@@ -1,17 +1,31 @@
-import { create } from 'zustand'
+// import { create } from 'zustand'
+import { createWithEqualityFn as create } from 'zustand/traditional'
 import { persist, createJSONStorage } from 'zustand/middleware'
+
+import typicalZustandStoreExcludes from '@articles-media/articles-dev-box/typicalZustandStoreExcludes';
+import typicalZustandStoreStateSlice from '@articles-media/articles-dev-box/typicalZustandStoreStateSlice';
+
+import generateRandomNickname from '@/util/generateRandomNickname';
 
 export const useStore = create()(
   persist(
     (set, get) => ({
 
-      darkMode: true,
-      toggleDarkMode: () => set({ darkMode: !get().darkMode }),
+      ...typicalZustandStoreStateSlice(set, get, generateRandomNickname),
 
     }),
     {
-      name: 'accounts-site-storage', // name of the item in the storage (must be unique)
-      storage: createJSONStorage(() => sessionStorage), // (optional) by default, 'localStorage' is used
+      name: `${process.env.NEXT_PUBLIC_GAME_KEY}-store`,
+      version: 2,
+      onRehydrateStorage: (state) => {
+        return () => state.setHasHydrated(true)
+      },
+      partialize: (state) =>
+        Object.fromEntries(
+          Object.entries(state).filter(([key]) => ![
+            ...typicalZustandStoreExcludes,
+          ].includes(key))
+        ),
     },
   ),
 )

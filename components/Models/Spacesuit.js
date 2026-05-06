@@ -9,7 +9,8 @@ import { useGraph } from '@react-three/fiber'
 import { useGLTF, useAnimations } from '@react-three/drei'
 import { SkeletonUtils } from 'three-stdlib'
 
-const link = `${process.env.NEXT_PUBLIC_CDN}games/Assets/Quaternius/men/Spacesuit-transformed.glb`
+// const link = `${process.env.NEXT_PUBLIC_CDN}games/Assets/Quaternius/men/Spacesuit-transformed.glb`
+const link = `models/Spacesuit-transformed.glb`
 
 export function Model(props) {
   const group = React.useRef()
@@ -21,16 +22,15 @@ export function Model(props) {
   const { previewConfig } = props
 
   useEffect(() => {
-
-    console.log("Actions", actions)
-    Object.values(actions).forEach((a) => a.stop());
-
-    if (props.action) {
-      actions[props.action].play();
-    } else {
-      actions[`Idle`].play();
+    const activeAction = props.action || 'Idle';
+    if (actions[activeAction]) {
+      actions[activeAction].reset().fadeIn(0.5).play();
     }
-
+    return () => {
+      if (actions[activeAction]) {
+        actions[activeAction].fadeOut(0.5);
+      }
+    };
   }, [actions, props.action]);
 
   return (
