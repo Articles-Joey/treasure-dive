@@ -23,7 +23,8 @@ function GameCanvas(props) {
     const gameHeight = 30
 
     const debug = useStore(state => state.debug)
-
+    const darkMode = useStore(state => state.darkMode)
+    const graphicsQuality = useStore(state => state.graphicsQuality);
     const showStats = useStore((state) => state?.debugConfig?.showStats);
     const toontownMode = useStore(state => state.toontownMode)
 
@@ -80,7 +81,12 @@ function GameCanvas(props) {
             />
 
             <Sky
-                sunPosition={[0, 10, 0]}
+                sunPosition={
+                    darkMode ? 
+                    [0, -10, 0]
+                    :
+                    [0, 10, 0]
+                }
             />
 
             <ambientLight intensity={1} />
@@ -88,7 +94,7 @@ function GameCanvas(props) {
 
             {toontownMode ?
                 <>
-                    <ModelDonaldsBoat 
+                    <ModelDonaldsBoat
                         rotation={[0, degToRad(90), 0]}
                         position={[0.5, 0.25, 0]}
                     />
@@ -114,7 +120,7 @@ function GameCanvas(props) {
                 args={[50, 20]}
             />
 
-            <Physics>
+            <Physics gravity={[0, 0, 0]}>
 
                 {physicsContent}
 

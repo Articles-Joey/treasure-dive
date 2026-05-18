@@ -7,12 +7,15 @@ import dynamic from 'next/dynamic'
 
 import useFullscreen from '@/hooks/useFullScreen';
 
-import LeftPanelContent from '@/components/Game/LeftPanel';
+import LeftPanelContent from '@/components/UI/LeftPanel';
 import { useSocketStore } from '@/hooks/useSocketStore';
 
 import GameMenu from '@articles-media/articles-dev-box/GameMenu';
 import classNames from 'classnames';
 import { useStore } from '@/hooks/useStore';
+import SinglePlayerHandler from '@/components/Handlers/SinglePlayerHandler';
+import { useGameStore } from '@/hooks/useGameStore';
+import GameOverModal from '@/components/UI/GameOverModal';
 
 const GameCanvas = dynamic(() => import('@/components/Game/GameCanvas'), {
     ssr: false,
@@ -36,22 +39,7 @@ export default function GamePage() {
     const menuOpen = useStore(state => state.menuOpen)
     const sidebar = useStore(state => state.sidebar)
 
-    useEffect(() => {
-
-        if (server && socket.connected) {
-            socket.emit('join-room', `game:cannon-room-${server}`, {
-                game_id: server,
-                nickname: JSON.parse(localStorage.getItem('game:nickname')),
-                client_version: '1',
-
-            });
-        }
-
-        // return function cleanup() {
-        //     socket.emit('leave-room', 'game:glass-ceiling-landing')
-        // };
-
-    }, [server, socket.connected]);
+    const showGameOverModal = useGameStore(state => state.showGameOverModal)
 
     return (
 
@@ -67,6 +55,13 @@ export default function GamePage() {
             id={`${process.env.NEXT_PUBLIC_GAME_KEY}-game-page`}
         >
 
+            {showGameOverModal &&
+                <GameOverModal
+                    show={showGameOverModal}
+                    setShow={useGameStore.getState().setShowGameOverModal}
+                />
+            }
+
             <GameMenu
                 useStore={useStore}
                 LeftPanelContent={LeftPanelContent}
@@ -78,6 +73,8 @@ export default function GamePage() {
                     style: "Static Panel",
                 }}
             />
+
+            <SinglePlayerHandler />
 
             <div className='canvas-wrap'>
 

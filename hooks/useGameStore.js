@@ -1,7 +1,7 @@
 // import { create } from 'zustand'
 import { createWithEqualityFn as create } from 'zustand/traditional'
 
-const chestY = -30
+
 
 export const useGameStore = create((set) => ({
 
@@ -84,39 +84,6 @@ export const useGameStore = create((set) => ({
             totalDistance: newValue
         }))
     },
-
-    chests: [
-        {
-            position: [-5, -2, 0],
-            isHeld: false,
-            captured: false,
-        },
-        {
-            position: [-5, chestY, 0],
-            isHeld: false,
-            captured: false,
-        },
-        {
-            position: [-2.5, chestY, 0],
-            isHeld: false,
-            captured: false,
-        },
-        {
-            position: [0, chestY, 0],
-            isHeld: false,
-            captured: false,
-        },
-        {
-            position: [2.5, chestY, 0],
-            isHeld: false,
-            captured: false,
-        },
-        {
-            position: [5, chestY, 0],
-            isHeld: false,
-            captured: false,
-        }
-    ],
     setChests: (newValue) => {
         set((prev) => ({
             chests: newValue
@@ -154,21 +121,12 @@ export const useGameStore = create((set) => ({
             gameState: newValue
         }))
     },
-}))
 
-export const useControlsStore = create((set) => ({
-
-    touchControls: {
-        jump: false,
-        left: false,
-        right: false,
-        up: false,
-        down: false
-    },
-    setTouchControls: (newValue) => {
+    showGameOverModal: false,
+    setShowGameOverModal: (newValue) => {
         set((prev) => ({
-            touchControls: newValue
+            showGameOverModal: newValue
         }))
-    }
+    },
 
 }))

@@ -15,7 +15,6 @@ import "@articles-media/articles-dev-box/dist/style.css";
 import "@articles-media/articles-gamepad-helper/dist/articles-gamepad-helper.css";
 
 import SocketLogicHandler from "@/components/SocketLogicHandler";
-import GlobalClientModals from '@/components/UI/GlobalClientModals';
 import LayoutClient from './layout-client';
 import { Suspense } from 'react';
 
@@ -39,12 +38,9 @@ export default function RootLayout({ children }) {
     <html lang="en">
 
       <head>
-
-        {/* <link
-          rel="stylesheet"
-          href={`${process.env.NEXT_PUBLIC_CDN}fonts/fontawsome/css/all.min.css`}
-        /> */}
-
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true" />
+        <link href="https://fonts.googleapis.com/css2?family=Original+Surfer&display=swap" rel="stylesheet" />
       </head>
 
       <body
@@ -53,10 +49,6 @@ export default function RootLayout({ children }) {
 
         <LayoutClient />
         <SocketLogicHandler />
-
-        <Suspense>
-          <GlobalClientModals />
-        </Suspense>
 
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
           <ThemeProvider theme={theme}>

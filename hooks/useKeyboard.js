@@ -10,11 +10,6 @@ function actionByKey(key) {
         ShiftLeft: 'shift',
         KeyC: 'crouch',
         KeyV: 'cameraView',
-		Digit1: 'dirt',
-		Digit2: 'grass',
-		Digit3: 'glass',
-		Digit4: 'wood',
-		Digit5: 'log',
 	}
 	return keyActionMap[key]
 }
@@ -29,16 +24,11 @@ export const useKeyboard = () => {
         shift: false,
         crouch: false,
         cameraView: false,
-		dirt: false,
-		grass: false,
-		glass: false,
-		wood: false,
-		log: false,
 	})
 
 	const handleKeyDown = useCallback((e) => {
 		const action = actionByKey(e.code)
-        console.log("test")
+        // console.log("test")
 		if (action) {
 			setActions((prev) => {
 				return ({
@@ -51,7 +41,7 @@ export const useKeyboard = () => {
 
 	const handleKeyUp = useCallback((e) => {
 		const action = actionByKey(e.code)
-        console.log("test")
+        // console.log("test")
 		if (action) {
 			setActions((prev) => {
 				return ({

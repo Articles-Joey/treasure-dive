@@ -1,6 +1,12 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
+const initialStore = {
+  enabled: true,
+  game_volume: 50,
+  music_volume: 50,
+}
+
 export const useAudioStore = create()(
   persist(
     (set, get) => ({
@@ -12,20 +18,15 @@ export const useAudioStore = create()(
         });
       },
 
-      audioSettings: {
-        enabled: true,
-        game_volume: 50,
-        music_volume: 50,
-        sfx_volume: 50,
-        backgroundMusicVolume: 15,
-        soundEffectsVolume: 50,
-      },
+      audioSettings: initialStore,
       setAudioSettings: (newValue) => set({ audioSettings: newValue }),
+
+      resetAudioSettings: () => set({ audioSettings: initialStore }),
 
     }),
     {
       name: 'audio-store', // name of the item in the storage (must be unique)
-      version: 0,
+      version: 1,
       onRehydrateStorage: () => (state) => {
         state.setHasHydrated(true)
       },

@@ -13,7 +13,8 @@ import { Dropdown, DropdownButton } from "react-bootstrap";
 import GameMenuPrimaryButtonGroup from '@articles-media/articles-dev-box/GameMenuPrimaryButtonGroup';
 import { useStore } from "@/hooks/useStore";
 import Minimap from "./Minimap";
-import DebugPanel from "./DebugPanel";
+import DebugPanel from "../Game/DebugPanel";
+import GameDetailsPanel from "./GameDetailsPanel";
 
 function LeftPanelContent(props) {
 
@@ -25,28 +26,10 @@ function LeftPanelContent(props) {
         socket: state.socket,
     }));
 
-    // const {
-    //     setScore,
-    //     debug,
-    //     setDebug,
-    //     cameraMode,
-    //     setCameraMode,
-    // } = useGameStore(state => ({
-    //     rotation: state.rotation,
-    //     setRotation: state.setRotation,
-    //     playerLocation: state.playerLocation,
-    //     holdingChest: state.holdingChest,
-    //     score: state.score,
-    //     setScore: state.setScore,
-    //     debug: state.debug,
-    //     setDebug: state.setDebug,
-    //     cameraMode: state.cameraMode,
-    //     setCameraMode: state.setCameraMode,
-    // }));
-
     const debug = useStore(state => state.debug)
     const setDebug = useStore(state => state.setDebug)
 
+    const status = useGameStore(state => state.gameState.status)
     const setScore = useGameStore(state => state.setScore)
     const cameraMode = useGameStore(state => state.cameraMode)
     const setCameraMode = useGameStore(state => state.setCameraMode)
@@ -174,13 +157,15 @@ function LeftPanelContent(props) {
                 </div>
             </div>
 
+            <GameDetailsPanel />
+
             {/* Minimap */}
-            <Minimap />
+            < Minimap />
 
             {/* Debug */}
             {debug && <DebugPanel />}
 
-        </div>
+        </div >
     )
 
 }

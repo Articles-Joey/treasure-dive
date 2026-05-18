@@ -1,7 +1,7 @@
 import { useFrame, useThree } from "@react-three/fiber"
 import { useSphere } from "@react-three/cannon"
 import { useGLTF, useAnimations, Text } from '@react-three/drei'
-import { memo, useEffect, useRef, useState } from "react"
+import { memo, use, useEffect, useRef, useState } from "react"
 import { Vector3 } from "three"
 import * as THREE from 'three';
 // import { useKeyboard } from "components/Games/Epcot/hooks/useKeyboard"
@@ -11,12 +11,16 @@ import { useControlsStore, useGameStore } from "@/hooks/useGameStore";
 
 // import ClownfishModel from "./PlayerModels/Clownfish"
 // import BoneFishModel from "./PlayerModels/BoneFish"
-import { useLocalStorageNew } from "@/hooks/useLocalStorageNew"
+// import { useLocalStorageNew } from "@/hooks/useLocalStorageNew"
 
 import { Model as SpacesuitModel } from "@/components/Models/Spacesuit";
 import { degToRad } from "three/src/math/MathUtils.js"
 import { HeldChest } from "@/components/Game/HeldChest"
 import { useKeyboard } from "@/hooks/useKeyboard"
+import { useStore } from "@/hooks/useStore"
+import useGameHelpers from "@/hooks/useGameHelpers"
+import { useSearchParams } from "next/navigation"
+import useTouchControlsStore from "@/hooks/useTouchControlsStore"
 
 const JUMP_FORCE = 6;
 const SPEED = 4;
@@ -32,7 +36,13 @@ function myToFixed(i, digits) {
 
 function PlayerBase(props) {
 
+    const searchParams = useSearchParams()
+    const params = Object.fromEntries(searchParams.entries());
+    const { server } = params
+
     // const { setPlayerData, teleportPlayer, setTeleportPlayer } = props;
+
+    const nickname = useStore((state) => state.nickname)
 
     const {
         cameraMode, setCameraMode,
@@ -64,16 +74,18 @@ function PlayerBase(props) {
         debug: state.debug
     }));
 
+    const status = useGameStore(state => state.gameState.status)
+
     const {
         touchControls, setTouchControls
-    } = useControlsStore()
+    } = useTouchControlsStore()
 
     const { controllerState, setControllerState } = useControllerStore()
 
-    const [character, setCharacter] = useLocalStorageNew("game:ocean-rings:character", {
-        model: 'Clownfish',
-        color: '#000000'
-    })
+    // const [character, setCharacter] = useLocalStorageNew("game:ocean-rings:character", {
+    //     model: 'Clownfish',
+    //     color: '#000000'
+    // })
 
     // Attach event listeners when the component mounts
     useEffect(() => {
@@ -106,22 +118,56 @@ function PlayerBase(props) {
 
     const { camera } = useThree()
 
+    const {
+        handleChestDrop,
+        handleChestPickup,
+        handlePlayerMove,
+        handleChestClaim
+    } = useGameHelpers()
+
     const [ref, api] = useSphere(() => ({
         // type: "Kinematic",
         mass: 1,
         args: [0.5],
-        // gravity: [0, 0, 0],
         position: [0, -1, 0],
         onCollide: (e) => {
 
+            const gameStatePlayer = useGameStore.getState().gameState?.players?.find(p => p.id === 'local')
+
             if (e?.body.userData.isEnemy) {
+
                 console.log("Enemy collision")
                 onEnemyCollisionRef.current?.()
+
+                handleChestDrop()
+
             }
 
             if (e?.body.userData.isChest) {
+
                 console.log("Chest collision", e.body.userData)
-                setHoldingChest(e.body.userData.index)
+
+                console.log(
+                    "gameStatePlayer",
+                    gameStatePlayer
+                )
+
+                if (
+                    (
+                        gameStatePlayer.heldChests?.length
+                        ||
+                        0
+                    ) == 0
+                ) {
+                    console.log("???")
+                    handleChestPickup(
+                        gameStatePlayer.id,
+                        e.body.userData.index
+                    )
+                }
+
+                // setHoldingChest(e.body.userData.index)
+
             }
 
         }
@@ -140,16 +186,33 @@ function PlayerBase(props) {
 
     const pos = useRef([0, 0, 0])
     const playerModelRef = useRef()
+    const nicknameRef = useRef()
     const stunnedRef = useRef(false)
     const stunTimeoutRef = useRef(null)
     const onEnemyCollisionRef = useRef(null)
     const rollYOffsetRef = useRef(0)
     const rollYTargetRef = useRef(0)
+
+    useEffect(() => {
+
+        const gameStatePlayer = useGameStore.getState().gameState?.players?.find(p => p.id === 'local')
+
+        if (gameStatePlayer?.position) {
+            api.position.set(
+                gameStatePlayer.position[0],
+                gameStatePlayer.position[1],
+                gameStatePlayer.position[2]
+            )
+        }
+
+    }, [])
+    
     useEffect(() => {
 
         const unsubscribe = api.position.subscribe((p) => {
 
             pos.current = p
+            handlePlayerMove('local', p)
 
             // if (p[1] > 0) {
             //     console.log("Player has surfaced", holdingChest)
@@ -166,11 +229,14 @@ function PlayerBase(props) {
         const unsubscribe = api.position.subscribe((p) => {
 
             if (p[1] > 0) {
-                console.log("Player has surfaced", holdingChest)
+                console.log("Player has surfaced")
 
-                if (holdingChest !== false) {
-                    setHoldingChest(false)
-                    addScore()
+                const heldChestIndex = useGameStore.getState().gameState?.players?.find(p => p.id === 'local')?.heldChests?.[0]
+
+                if (heldChestIndex !== undefined) {
+                    // setHoldingChest(false)
+                    // addScore()
+                    handleChestClaim('local', heldChestIndex)
                 }
             }
 
@@ -198,6 +264,18 @@ function PlayerBase(props) {
     }, [moveForward, moveRight, moveLeft])
 
     useFrame((state, delta) => {
+
+        // Make nickname follow player position, but keep upright
+        if (nicknameRef.current) {
+            // Place slightly above or below player (adjust y offset as needed)
+            nicknameRef.current.position.set(
+                pos.current[0],
+                pos.current[1] + 0.75,
+                pos.current[2]
+            );
+            // Keep upright: zero rotation
+            nicknameRef.current.rotation.set(0, 0, 0);
+        }
 
         // Lerp roll Y offset and update model position along player's local up axis
         rollYOffsetRef.current = THREE.MathUtils.lerp(rollYOffsetRef.current, rollYTargetRef.current, delta * 8);
@@ -273,73 +351,29 @@ function PlayerBase(props) {
         //     setMaxHeight(pos.current[1].toFixed(2))
         // }
 
-        if (!stunnedRef.current && moveForward) {
-            const direction = new Vector3()
-            const moveSpeed = SPEED * (shift ? 2 : 0.5);
+        const currentStatus = useGameStore.getState().gameState?.status;
 
-            const rad = degToRad(rotationRef.current);
-
-            // Calculate the direction vector based on rotation
-            direction.set(
-                Math.sin(rad), // X component
-                -Math.cos(rad), // Maintain current Y velocity
-                vel.current[2] // Z component (forward/backward movement)
-            );
-
-            // Normalize and scale the vector
-            direction.normalize().multiplyScalar(moveSpeed);
-
-            api.velocity.set(direction.x, direction.y, direction.z);
-        } else {
-            api.velocity.set(0, 0, 0)
-        }
-
-        return
-
-        api.velocity.set(0, -1, 0)
-
-        return
-
-        const frontVector = new Vector3(
-            0,
-            (moveBackward || touchControls.down ? -1 : 0) - (moveForward || touchControls.up ? -1 : 0),
-            0
-        )
-
-        const sideVector = new Vector3(
-            (moveLeft || touchControls.left ? 1 : 0) - (moveRight || touchControls.right ? 1 : 0),
-            0,
-            0,
-        )
-
-        direction
-            .subVectors(frontVector, sideVector)
-            .normalize()
-            .multiplyScalar(SPEED * (shift ? 2 : 1))
-        // .applyEuler(camera.rotation)
-
-        api.velocity.set(direction.x, direction.y, 0)
-
-        if ((jump || touchControls.jump) && Math.abs(vel.current[1]) < 0.05) {
-
-            console.log("Jump understood")
-
-            api.velocity.set(vel.current[0], JUMP_FORCE, vel.current[2])
-
-            if (
-                touchControls.jump
-                // ||
-                // touchControls.left
-                // ||
-                // touchControls.right
-            ) {
-                setTouchControls({
-                    ...touchControls,
-                    jump: false,
-                    // left: false,
-                    // right: false
-                })
+        if (currentStatus === "In Progress") {
+            if (!stunnedRef.current && moveForward) {
+                const direction = new Vector3();
+                const moveSpeed = SPEED * (shift ? 2 : 0.5);
+                const rad = degToRad(rotationRef.current);
+                // Calculate the direction vector based on rotation
+                direction.set(
+                    Math.sin(rad), // X component
+                    -Math.cos(rad), // Maintain current Y velocity
+                    vel.current[2] // Z component (forward/backward movement)
+                );
+                // Normalize and scale the vector
+                direction.normalize().multiplyScalar(moveSpeed);
+                api.velocity.set(direction.x, direction.y, direction.z);
+            } else {
+                // Slowly sink with gravity (Y axis)
+                api.velocity.set(0, -0.5, 0);
             }
+        } else {
+            // No movement or sinking if not in progress
+            api.velocity.set(0, 0, 0);
         }
 
     })
@@ -358,7 +392,7 @@ function PlayerBase(props) {
             gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
             oscillator.start(ctx.currentTime);
             oscillator.stop(ctx.currentTime + 0.3);
-        } catch (e) {}
+        } catch (e) { }
     };
 
     onEnemyCollisionRef.current = () => {
@@ -390,31 +424,41 @@ function PlayerBase(props) {
         }
     }, [rotation]);
 
-
+    const players = useGameStore(state => state.gameState.players)
+    const localPlayer = (
+        server ?
+            players?.find(p => p.id === socket.id)
+            :
+            players?.find(p => p.id === 'local')
+    )
 
     return (
         <group>
-
-            <group
-                ref={playerModelRef}
+            <Text
+                ref={nicknameRef}
+                color="black"
+                position={[0, 0, 0]}
+                scale={0.25}
+                anchorX="center"
+                anchorY="middle"
             >
+                {nickname}
+            </Text>
+            <group ref={playerModelRef}>
                 <SpacesuitModel
                     rotation={[degToRad(180), degToRad(180), 0]}
                     position={[0, 1, 0]}
                     action={action}
                 />
-                {holdingChest !== false &&
+                {(localPlayer?.heldChests?.length || 0) > 0 &&
                     <HeldChest
                         position={[0, -.2, 0.1]}
                         rotation={[0, degToRad(180), 0]}
                     />
                 }
             </group>
-
             <mesh
                 ref={ref}
-                // {...props}
-                // position={position}
                 material={material}
             >
                 {debug &&
@@ -422,18 +466,7 @@ function PlayerBase(props) {
                         args={[0.5, 32, 32]}
                     />
                 }
-
-                {/* {character.model == 'Clownfish' && <ClownfishModel rotation={[0, Math.PI / 1, 0]} />}
-                {character.model == 'Bone Fish' && <BoneFishModel rotation={[0, -Math.PI / 2, 0]} />} */}
-
-                {/* <Text
-                    color="black" position={[0, -0.7, 0]} scale={0.3} anchorX="center" anchorY="middle"
-                >
-                    Player ({character.model})
-                </Text> */}
-
             </mesh>
-
         </group>
     )
 }

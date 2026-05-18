@@ -46,7 +46,7 @@ export default function LobbyPage() {
     const darkMode = useStore(state => state.darkMode)
     const lobbyDetails = useStore(state => state.lobbyDetails)
 
-        const {
+    const {
         data: userToken,
         error: userTokenError,
         isLoading: userTokenLoading,
@@ -63,34 +63,6 @@ export default function LobbyPage() {
     } = useUserDetails({
         token: userToken
     });
-
-    useEffect(() => {
-
-        socket.on(`game:${process.env.NEXT_PUBLIC_GAME_KEY}-landing-details`, function (msg) {
-            console.log(`game:${process.env.NEXT_PUBLIC_GAME_KEY}-landing-details`, msg)
-
-            if (JSON.stringify(msg) !== JSON.stringify(lobbyDetails)) {
-                setLobbyDetails(msg)
-            }
-        });
-
-        return () => {
-            socket.off(`game:${process.env.NEXT_PUBLIC_GAME_KEY}-landing-details`);
-        };
-
-    }, [])
-
-    useEffect(() => {
-
-        if (socket.connected) {
-            socket.emit('join-room', `game:${process.env.NEXT_PUBLIC_GAME_KEY}-landing`);
-        }
-
-        return function cleanup() {
-            socket.emit('leave-room', `game:${process.env.NEXT_PUBLIC_GAME_KEY}-landing`)
-        };
-
-    }, [socket.connected]);
 
     return (
 
@@ -116,7 +88,7 @@ export default function LobbyPage() {
                             src={logo.src}
                         >
                         </img>
-                        <h1 className="mb-0">Treasure Dive</h1>
+                        <h1 className="mb-0 original-surfer-regular">Treasure Dive</h1>
                     </div>
 
                     <div
@@ -264,6 +236,7 @@ export default function LobbyPage() {
                 />
 
             </div>
+
         </div>
     );
 }
