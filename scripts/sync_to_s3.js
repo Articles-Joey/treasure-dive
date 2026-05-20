@@ -1,5 +1,6 @@
 const { execSync } = require('child_process');
 const path = require('path');
+const game_name = "Treasure Dive";
 
 /**
  * Syncs the public folder to an S3 bucket using AWS CLI (aws s3 sync).
@@ -11,7 +12,7 @@ const path = require('path');
  */
 
 // const targetBucket = process.argv[2];
-const targetBucket = `s3://articles-website/games/Treasure Dive/public/`
+const targetBucket = `s3://articles-website/games/${game_name}/public/`
 
 if (!targetBucket) {
     console.error('Error: Please provide a target S3 bucket URI.');

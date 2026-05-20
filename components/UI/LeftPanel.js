@@ -15,6 +15,7 @@ import { useStore } from "@/hooks/useStore";
 import Minimap from "./Minimap";
 import DebugPanel from "../Game/DebugPanel";
 import GameDetailsPanel from "./GameDetailsPanel";
+import { useRouter } from "next/navigation";
 
 function LeftPanelContent(props) {
 
@@ -44,6 +45,7 @@ function LeftPanelContent(props) {
                     <GameMenuPrimaryButtonGroup
                         useStore={useStore}
                         type="GameMenu"
+                        useRouter={useRouter}
                     />
 
                     <div className='w-100 p-1'></div>

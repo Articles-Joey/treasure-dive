@@ -24,7 +24,7 @@ function Minimap() {
     }
 
     return (
-        <div className="card card-articles card-sm">
+        <div className="minimap card card-articles card-sm">
             <div className="mx-auto" style={{ position: 'relative', width: '200px' }}>
                 <img
                     src={`${process.env.NEXT_PUBLIC_CDN}games/Treasure Dive/treasure-dive-toontown-map.jpg`}

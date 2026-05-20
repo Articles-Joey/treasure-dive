@@ -32,7 +32,7 @@ export function ModelDonaldsBoat(props) {
   }
 
   return (
-    <group {...props} dispose={null} scale={15}>
+    <group {...props} dispose={null} scale={20}>
       <mesh geometry={nodes.above_water_Shader14_0.geometry} material={getMaterial(materials.Shader14)} scale={0.01} />
       <mesh geometry={nodes.above_water_Shader15_0.geometry} material={getMaterial(materials.Shader15)} scale={0.01} />
       {/* Slight tweak from 0.01 to avoid zindex flash */}

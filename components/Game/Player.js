@@ -21,6 +21,7 @@ import { useStore } from "@/hooks/useStore"
 import useGameHelpers from "@/hooks/useGameHelpers"
 import { useSearchParams } from "next/navigation"
 import useTouchControlsStore from "@/hooks/useTouchControlsStore"
+import { ModelNewPlayer } from "../Models/NewPlayer"
 
 const JUMP_FORCE = 6;
 const SPEED = 4;
@@ -427,7 +428,7 @@ function PlayerBase(props) {
     const players = useGameStore(state => state.gameState.players)
     const localPlayer = (
         server ?
-            players?.find(p => p.id === socket.id)
+            players?.find(p => p.id === socket?.id)
             :
             players?.find(p => p.id === 'local')
     )
@@ -445,11 +446,22 @@ function PlayerBase(props) {
                 {nickname}
             </Text>
             <group ref={playerModelRef}>
-                <SpacesuitModel
+
+                {/* <SpacesuitModel
                     rotation={[degToRad(180), degToRad(180), 0]}
                     position={[0, 1, 0]}
                     action={action}
+                /> */}
+
+                <ModelNewPlayer 
+                    position={[0, 0.2, -0.55]}
+                    rotation={[
+                        degToRad(90), 
+                        degToRad(0), 
+                        0
+                    ]}
                 />
+
                 {(localPlayer?.heldChests?.length || 0) > 0 &&
                     <HeldChest
                         position={[0, -.2, 0.1]}

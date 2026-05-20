@@ -14,19 +14,9 @@ import "@articles-media/articles-dev-box/dist/style.css";
 
 import "@articles-media/articles-gamepad-helper/dist/articles-gamepad-helper.css";
 
-import SocketLogicHandler from "@/components/SocketLogicHandler";
+import SocketLogicHandler from "@/components/Handlers/SocketLogicHandler";
 import LayoutClient from './layout-client';
 import { Suspense } from 'react';
-
-// const geistSans = Geist({
-//   variable: "--font-geist-sans",
-//   subsets: ["latin"],
-// });
-
-// const geistMono = Geist_Mono({
-//   variable: "--font-geist-mono",
-//   subsets: ["latin"],
-// });
 
 export const metadata = {
   title: process.env.NEXT_PUBLIC_GAME_NAME,
@@ -48,7 +38,9 @@ export default function RootLayout({ children }) {
       >
 
         <LayoutClient />
-        <SocketLogicHandler />
+        <Suspense>
+          <SocketLogicHandler />
+        </Suspense>
 
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
           <ThemeProvider theme={theme}>

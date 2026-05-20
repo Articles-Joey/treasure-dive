@@ -80,7 +80,7 @@ export default function LayoutClient({ children }) {
                         }
                     }}
                     infoModalConfig={{
-                        previewImage: darkMode ? "img/game-preview.webp" : "img/game-preview.webp",
+                        previewImage: darkMode ? "img/preview.gif" : "img/preview.gif",
                         appendContent: <>
 
                         </>
