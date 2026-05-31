@@ -45,6 +45,7 @@ export default function LobbyPage() {
                     // comingSoon: true,
                     defaultServers: 2,
                     // privateServerSupport: false,
+                    onlinePlayersTemplate: "2.0",
                 }}
                 gameScoreboardConfig={{
                     append_score_text: "m",

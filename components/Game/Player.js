@@ -22,6 +22,7 @@ import useGameHelpers from "@/hooks/useGameHelpers"
 import { useSearchParams } from "next/navigation"
 import useTouchControlsStore from "@/hooks/useTouchControlsStore"
 import { ModelNewPlayer } from "../Models/NewPlayer"
+import { useSocketStore } from "@/hooks/useSocketStore"
 
 const JUMP_FORCE = 6;
 const SPEED = 4;
@@ -42,6 +43,8 @@ function PlayerBase(props) {
     const { server } = params
 
     // const { setPlayerData, teleportPlayer, setTeleportPlayer } = props;
+
+    const socket = useSocketStore((state) => state.socket)
 
     const nickname = useStore((state) => state.nickname)
 
