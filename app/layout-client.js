@@ -1,25 +1,27 @@
 "use client"
 import packageInfo from '@/package.json';
+import { Suspense } from "react";
+import { useHotkeys } from 'react-hotkeys-hook';
 
-import DarkModeHandler from "@articles-media/articles-dev-box/DarkModeHandler";
 import { useStore } from '@/hooks/useStore';
-import GlobalBody from '@articles-media/articles-dev-box/GlobalBody';
-import ToontownModeHandler from '@articles-media/articles-dev-box/ToontownModeHandler';
-import GlobalClientModals from '@articles-media/articles-dev-box/GlobalClientModals';
 import { useAudioStore } from "@/hooks/useAudioStore";
 import useTouchControlsStore from "@/hooks/useTouchControlsStore";
 import { useSocketStore } from "@/hooks/useSocketStore";
-import { Suspense } from "react";
-import { useHotkeys } from 'react-hotkeys-hook';
+
+import DarkModeHandler from "@articles-media/articles-dev-box/DarkModeHandler";
+import GlobalBody from '@articles-media/articles-dev-box/GlobalBody';
+import ToontownModeHandler from '@articles-media/articles-dev-box/ToontownModeHandler';
+import GlobalClientModals from '@articles-media/articles-dev-box/GlobalClientModals';
+import HotkeyHandler from '@articles-media/articles-dev-box/HotkeyHandler';
 
 export default function LayoutClient({ children }) {
 
     const darkMode = useStore((state) => state.darkMode);
 
-    useHotkeys('r', () => {
-        console.log("Reloading Scene")
-        useStore.getState().reloadScene();
-    }, [])
+    // useHotkeys('r', () => {
+    //     console.log("Reloading Scene")
+    //     useStore.getState().reloadScene();
+    // }, [])
 
     return (
         <>
@@ -30,7 +32,9 @@ export default function LayoutClient({ children }) {
             <ToontownModeHandler
                 useStore={useStore}
             />
+
             <Suspense>
+
                 <GlobalClientModals
                     useStore={useStore}
                     useAudioStore={useAudioStore}
@@ -86,6 +90,12 @@ export default function LayoutClient({ children }) {
                         </>
                     }}
                 />
+
+                <HotkeyHandler
+                    useStore={useStore}
+                    useHotkeys={useHotkeys}
+                />
+
             </Suspense>
         </>
     );
