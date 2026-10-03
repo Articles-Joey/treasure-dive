@@ -1,3 +1,5 @@
+"use client";
+import Box from "@mui/material/Box";
 import { useState, useEffect } from 'react';
 
 // import { useSelector, useDispatch } from 'react-redux'
@@ -20,21 +22,21 @@ export default function IsDev({className, noOutline, children, inline}) {
     // I think this is better but you can do either way
     if (children && userReduxState?.roles?.isDev && isMounted) {
         return (
-            <div className={`is-dev-content ${noOutline && 'no-outline'} ${className} ${inline && 'd-inline-block'}`}>{children}</div>
+            <Box className={`is-dev-content ${noOutline ? 'no-outline' : ''} ${className || ''}`} sx={{ display: inline ? 'inline-block' : 'block' }}>{children}</Box>
         )
     }
 
     return
 
     return (
-        <div className="d-flex align-items-center">
+        <Box sx={{ display: "flex", alignItems: "center" }}>
 
-            <div className="small badge bg-dark">
+            <Box component="span" sx={{ fontSize: "0.875em", px: "0.65em", py: "0.35em", fontWeight: 700, lineHeight: 1, borderRadius: "0.375rem", bgcolor: "#212529", color: "#fff" }}>
                 Privacy mode enabled
-            </div>
+            </Box>
 
             <ArticlesButton
-                className="ms-auto"
+                sx={{ ml: "auto" }}
                 small
                 onClick={() => {
                     // dispatch( togglePrivacyMode() )
@@ -43,7 +45,7 @@ export default function IsDev({className, noOutline, children, inline}) {
                 Disable
             </ArticlesButton>
 
-        </div>
+        </Box>
     )
 
 }

@@ -1,111 +1,58 @@
-import { useGameStore } from "@/hooks/useGameStore"
-import ArticlesButton from "./Button"
-import useGameHelpers from "@/hooks/useGameHelpers"
+"use client";
+
+import Box from "@mui/material/Box";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Chip from "@mui/material/Chip";
+import { useGameStore } from "@/hooks/useGameStore";
+import ArticlesButton from "./Button";
+import useGameHelpers from "@/hooks/useGameHelpers";
 
 export default function GameDetailsPanel() {
-
-    const status = useGameStore(state => state.gameState.status)
-    const timer = useGameStore(state => state.gameState.timer)
-
-    const {
-        handleGameStart
-    } = useGameHelpers()
+    const status = useGameStore((state) => state.gameState.status);
+    const timer = useGameStore((state) => state.gameState.timer);
+    const { handleGameStart } = useGameHelpers();
 
     return (
-        <div className="card card-articles card-sm">
-            <div className="card-body">
-
-                <div>Status: {status}</div>
-                <div>Timer: {timer}</div>
-
-                <ArticlesButton
-                    size="sm"
-                    className="w-100"
-                    onClick={() => {
-
-                        const gameState = useGameStore.getState().gameState
-                        console.log(gameState)
-
-                        handleGameStart()
-
-                    }}
-                >
+        <Card sx={{ bgcolor: "game.card", backgroundImage: "none", fontSize: "0.875rem", border: 1, borderColor: "divider" }}>
+            <CardContent sx={{ p: 1, "&:last-child": { pb: 1 } }}>
+                <Box>Status: {status}</Box>
+                <Box>Timer: {timer}</Box>
+                <ArticlesButton small sx={{ width: "100%" }} onClick={() => handleGameStart()}>
                     Start Game
                 </ArticlesButton>
-
                 <Players />
-
-            </div>
-        </div >
-    )
-
+            </CardContent>
+        </Card>
+    );
 }
 
 function Players() {
-
-    const players = useGameStore(state => state.gameState.players)
+    const players = useGameStore((state) => state.gameState.players);
 
     return (
-        <div>
-
-            <div>Players</div>
-
-            {players?.length > 0 && players.map((player, index) => (
-                <div key={index} className="player-entry border p-2">
-
-                    {/* <div className="player-color" style={{ backgroundColor: player.color }}></div> */}
-
-                    <div className="d-flex justify-content-between align-items-center mb-0">
-
-                        <div
-                            className=""
-                            style={{ fontSize: "0.6rem" }}
-                        >
-                            ID: {player.id}
-                        </div>
-
-                        <div
-                            className="d-flex"
-                            style={{ fontSize: "0.6rem" }}
-                        >
-                            {player.heldChests?.length > 0 && <span className="me-1">Held Chests:</span>}
-                            {player.heldChests?.map((chest, index) => (
-                                <span key={index} className="badge bg-primary me-1">
-                                    {chest}
-                                </span>
+        <Box>
+            <Box>Players</Box>
+            {players?.map((player, index) => (
+                <Box key={player.id ?? index} sx={{ border: 1, borderColor: "divider", p: 1 }}>
+                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <Box sx={{ fontSize: "0.6rem" }}>ID: {player.id}</Box>
+                        <Box sx={{ display: "flex", alignItems: "center", fontSize: "0.6rem", gap: 0.5 }}>
+                            {player.heldChests?.length > 0 && <Box component="span">Held Chests:</Box>}
+                            {player.heldChests?.map((chest, chestIndex) => (
+                                <Chip key={chestIndex} label={chest} color="primary" size="small" sx={{ height: 20, fontSize: "0.6rem" }} />
                             ))}
-                        </div>
-
-                    </div>
-
-                    <div className="player-name d-flex align-items-center">
-                        <span
-                            className={`badge ${player.ready ? 'bg-success' : 'bg-danger'} me-1`}
-                            style={{
-                                fontSize: "0.6rem"
-                            }}
-                        >
-                            {player.ready ? "Ready" : "Not Ready"}
-                        </span>
-                        <span>{player.nickname || "?"} </span>
-                        <span>- {player.score || 0}</span>
-                    </div>
-
-                    <div className="d-flex justify-content-between">
-
-                        <div>
-                            <span>X: {player.position?.[0]?.toFixed(2) || 0}</span>
-                            <span> | </span>
-                            <span>Y: {player.position?.[1]?.toFixed(2) || 0}</span>
-                            <span> | </span>
-                            <span>Z: {player.position?.[2]?.toFixed(2) || 0}</span>
-                        </div>
-
-                    </div>
-
-                </div>
+                        </Box>
+                    </Box>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                        <Chip label={player.ready ? "Ready" : "Not Ready"} color={player.ready ? "success" : "error"} size="small" sx={{ height: 20, fontSize: "0.6rem" }} />
+                        <Box component="span">{player.nickname || "?"} - {player.score || 0}</Box>
+                    </Box>
+                    <Box>
+                        X: {player.position?.[0]?.toFixed(2) || 0} | Y: {player.position?.[1]?.toFixed(2) || 0} | Z: {player.position?.[2]?.toFixed(2) || 0}
+                    </Box>
+                </Box>
             ))}
-
-        </div>
-    )
+        </Box>
+    );
 }

@@ -1,3 +1,6 @@
+"use client";
+import Box from "@mui/material/Box";
+import Card from "@mui/material/Card";
 import { useGameStore } from "@/hooks/useGameStore"
 
 function Minimap() {
@@ -24,17 +27,28 @@ function Minimap() {
     }
 
     return (
-        <div className="minimap card card-articles card-sm">
-            <div className="mx-auto" style={{ position: 'relative', width: '200px' }}>
-                <img
+        <Card sx={{
+            bgcolor: 'game.card',
+            backgroundImage: 'none',
+            border: 1,
+            borderColor: 'divider',
+            '@media (min-width: 992px)': {
+                position: 'fixed', top: '1rem', right: '1rem', width: 200, height: 200, zIndex: 2,
+            },
+        }}>
+            <Box sx={{ position: 'relative', width: 200, mx: 'auto' }}>
+                <Box
+                    component="img"
                     src={`${process.env.NEXT_PUBLIC_CDN}games/Treasure Dive/treasure-dive-toontown-map.jpg`}
                     alt=""
-                    className="img-fluid mx-auto"
+                    sx={{ display: 'block', maxWidth: '100%', height: 'auto', mx: 'auto',
+                        '@media (min-width: 992px)': { width: '100%', height: 200, objectFit: 'cover' },
+                    }}
                     width={200}
                 />
                 {/* Player marker */}
-                <div
-                    style={{
+                <Box
+                    sx={{
                         position: 'absolute',
                         left: `${left}%`,
                         top: `${top}%`,
@@ -53,9 +67,9 @@ function Minimap() {
                     if (!chest || !Array.isArray(chest.position)) return null;
                     const coords = getChestCoords(chest.position);
                     return (
-                        <div
+                        <Box
                             key={idx}
-                            style={{
+                            sx={{
                                 position: 'absolute',
                                 left: `${coords.left}%`,
                                 top: `${coords.top}%`,
@@ -72,8 +86,8 @@ function Minimap() {
                         />
                     );
                 })}
-            </div>
-        </div>
+            </Box>
+        </Card>
     )
 
 }

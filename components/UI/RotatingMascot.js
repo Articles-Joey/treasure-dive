@@ -1,3 +1,5 @@
+"use client";
+import Box from "@mui/material/Box";
 import { OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { ModelKennyNLPirateShipDark } from "@/components/Models/ship_dark";
@@ -9,7 +11,7 @@ export default function RotatingMascot() {
     const toontownMode = useStore(state => state.toontownMode)
 
     return (
-        <div className="rotating-mascot-container w-100 h-100">
+        <Box className="rotating-mascot-container" sx={{ width: "100%", height: "100%" }}>
             <Canvas shadows>
 
                 <group position={[0, 0, 0]}>
@@ -55,6 +57,6 @@ export default function RotatingMascot() {
                 </group>
 
             </Canvas>
-        </div>
+        </Box>
     );
 }

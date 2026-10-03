@@ -1,4 +1,5 @@
 import LobbyPage from "."
+import { Suspense } from "react";
 
 export const metadata = {
     title: `${process.env.NEXT_PUBLIC_GAME_NAME} Lobby`,
@@ -7,7 +8,7 @@ export const metadata = {
 export default function Home() {
 
   return (
-    <LobbyPage />
+    <Suspense><LobbyPage /></Suspense>
   )
 
 }

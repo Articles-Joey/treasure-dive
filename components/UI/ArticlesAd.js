@@ -1,3 +1,5 @@
+"use client";
+import Box from "@mui/material/Box";
 import Script from "next/script";
 import { useEffect } from "react";
 import { useStore } from "@/hooks/useStore";
@@ -15,7 +17,7 @@ export default function ArticlesAd({ style }) {
     }, []);
 
     return (
-        <div>
+        <Box>
 
             <Script
                 src={process.env.NODE_ENV === "development" ?
@@ -39,10 +41,10 @@ export default function ArticlesAd({ style }) {
                 // }
             />
 
-            <div className={"articles-media-ad"}>
+            <Box className="articles-media-ad">
 
-            </div>
+            </Box>
 
-        </div>
+        </Box>
     );
 }

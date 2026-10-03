@@ -1,175 +1,116 @@
-import { memo } from "react";
+"use client";
 
-import Link from "next/link";
-
-// import ROUTES from '@/components/constants/routes';
-
-import ArticlesButton from "@/components/UI/Button";
-
-import { useSocketStore } from "@/hooks/useSocketStore";
+import { memo, useState } from "react";
+import { useRouter } from "next/navigation";
+import Box from "@mui/material/Box";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import BugReportIcon from "@mui/icons-material/BugReport";
+import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
+import VideocamIcon from "@mui/icons-material/Videocam";
+import ArticlesButton from "./Button";
+import GameMenuPrimaryButtonGroup from "@articles-media/articles-dev-box/GameMenuPrimaryButtonGroup";
 import { useGameStore } from "@/hooks/useGameStore";
-import { Dropdown, DropdownButton } from "react-bootstrap";
-
-import GameMenuPrimaryButtonGroup from '@articles-media/articles-dev-box/GameMenuPrimaryButtonGroup';
 import { useStore } from "@/hooks/useStore";
 import Minimap from "./Minimap";
 import DebugPanel from "../Game/DebugPanel";
 import GameDetailsPanel from "./GameDetailsPanel";
-import { useRouter } from "next/navigation";
 
-function LeftPanelContent(props) {
-
-    const reloadScene = useStore(state => state.reloadScene)
-
-    const {
-        socket,
-    } = useSocketStore(state => ({
-        socket: state.socket,
-    }));
-
-    const debug = useStore(state => state.debug)
-    const setDebug = useStore(state => state.setDebug)
-
-    const status = useGameStore(state => state.gameState.status)
-    const setScore = useGameStore(state => state.setScore)
-    const cameraMode = useGameStore(state => state.cameraMode)
-    const setCameraMode = useGameStore(state => state.setCameraMode)
+function LeftPanelContent() {
+    const reloadScene = useStore((state) => state.reloadScene);
+    const debug = useStore((state) => state.debug);
+    const setDebug = useStore((state) => state.setDebug);
+    const setScore = useGameStore((state) => state.setScore);
+    const cameraMode = useGameStore((state) => state.cameraMode);
+    const setCameraMode = useGameStore((state) => state.setCameraMode);
+    const [debugAnchor, setDebugAnchor] = useState(null);
+    const [cameraAnchor, setCameraAnchor] = useState(null);
 
     return (
-        <div className='w-100'>
-
-            <div className="card card-articles card-sm">
-
-                <div className="card-body d-flex flex-wrap">
-
-                    <GameMenuPrimaryButtonGroup
-                        useStore={useStore}
-                        type="GameMenu"
-                        useRouter={useRouter}
-                    />
-
-                    <div className='w-100 p-1'></div>
-
+        <Box sx={{ width: "100%" }}>
+            <Card sx={{ bgcolor: "game.card", backgroundImage: "none", fontSize: "0.875rem", border: 1, borderColor: "divider" }}>
+                <CardContent sx={{ p: 1, "&:last-child": { pb: 1 }, display: "flex", flexWrap: "wrap" }}>
+                    <GameMenuPrimaryButtonGroup useStore={useStore} type="GameMenu" useRouter={useRouter} />
+                    <Box sx={{ width: "100%", p: 0.5 }} />
                     <ArticlesButton
-                        size="sm"
-                        className="w-50"
-                        onClick={() => {
-                            reloadScene()
-                            setScore(0)
-                        }}
+                        small
+                        sx={{ width: "50%" }}
+                        startIcon={<RestartAltIcon />}
+                        onClick={() => { reloadScene(); setScore(0); }}
                     >
-                        <i className="fad fa-redo"></i>
                         Reload Game
                     </ArticlesButton>
-
-                    <div className='w-50'>
-                        <DropdownButton
-                            variant="articles w-100"
-                            size='sm'
-                            id="dropdown-basic-button"
-                            className="dropdown-articles"
-                            title={
-                                <span>
-                                    <i className="fad fa-bug"></i>
-                                    <span>Debug </span>
-                                    <span>{debug ? 'On' : 'Off'}</span>
-                                </span>
-                            }
-                        >
-
-                            <div style={{ maxHeight: '600px', overflowY: 'auto', width: '200px' }}>
-
-                                {[
-                                    false,
-                                    true
-                                ]
-                                    .map(location =>
-                                        <Dropdown.Item
-                                            key={location}
-                                            onClick={() => {
-                                                setDebug(location)
-                                                reloadScene()
-                                            }}
-                                            className="d-flex justify-content-between"
-                                        >
-                                            {location ? 'True' : 'False'}
-                                        </Dropdown.Item>
-                                    )}
-
-                            </div>
-
-                        </DropdownButton>
-                    </div>
-
                     <ArticlesButton
-                        size="sm"
-                        className="w-50"
-                        onClick={() => {
-
-                        }}
+                        id="debug-menu-button"
+                        small
+                        sx={{ width: "50%" }}
+                        startIcon={<BugReportIcon />}
+                        aria-haspopup="menu"
+                        aria-controls={debugAnchor ? "debug-menu" : undefined}
+                        aria-expanded={Boolean(debugAnchor)}
+                        onClick={(event) => setDebugAnchor(event.currentTarget)}
                     >
-                        <i className="fad fa-ufo"></i>
+                        Debug {debug ? "On" : "Off"}
+                    </ArticlesButton>
+                    <Menu
+                        id="debug-menu"
+                        anchorEl={debugAnchor}
+                        open={Boolean(debugAnchor)}
+                        onClose={() => setDebugAnchor(null)}
+                        slotProps={{ list: { "aria-labelledby": "debug-menu-button" }, paper: { sx: { maxHeight: 600, width: 200 } } }}
+                    >
+                        {[false, true].map((value) => (
+                            <MenuItem key={String(value)} selected={debug === value} onClick={() => {
+                                setDebug(value);
+                                setDebugAnchor(null);
+                                reloadScene();
+                            }}>
+                                {value ? "True" : "False"}
+                            </MenuItem>
+                        ))}
+                    </Menu>
+                    <ArticlesButton small sx={{ width: "50%" }} startIcon={<RocketLaunchIcon />} onClick={() => {}}>
                         Teleport
                     </ArticlesButton>
-
-                    <div className='w-50'>
-                        <DropdownButton
-                            variant="articles w-100"
-                            size='sm'
-                            id="dropdown-basic-button"
-                            className="dropdown-articles"
-                            title={
-                                <span>
-                                    <i className="fad fa-camera"></i>
-                                    <span>Camera</span>
-                                </span>
-                            }
-                        >
-
-                            <div style={{ maxHeight: '600px', overflowY: 'auto', width: '200px' }}>
-
-                                {[
-                                    {
-                                        name: 'Free',
-                                    },
-                                    {
-                                        name: 'Player',
-                                    }
-                                ]
-                                    .map(location =>
-                                        <Dropdown.Item
-                                            key={location.name}
-                                            active={cameraMode == location.name}
-                                            onClick={() => {
-                                                setCameraMode(location.name)
-                                                // setShowMenu(false)
-                                            }}
-                                            className="d-flex justify-content-between"
-                                        >
-                                            <i className="fad fa-camera"></i>
-                                            {location.name}
-                                        </Dropdown.Item>
-                                    )}
-
-                            </div>
-
-                        </DropdownButton>
-                    </div>
-
-                </div>
-            </div>
-
+                    <ArticlesButton
+                        id="camera-menu-button"
+                        small
+                        sx={{ width: "50%" }}
+                        startIcon={<VideocamIcon />}
+                        aria-haspopup="menu"
+                        aria-controls={cameraAnchor ? "camera-menu" : undefined}
+                        aria-expanded={Boolean(cameraAnchor)}
+                        onClick={(event) => setCameraAnchor(event.currentTarget)}
+                    >
+                        Camera
+                    </ArticlesButton>
+                    <Menu
+                        id="camera-menu"
+                        anchorEl={cameraAnchor}
+                        open={Boolean(cameraAnchor)}
+                        onClose={() => setCameraAnchor(null)}
+                        slotProps={{ list: { "aria-labelledby": "camera-menu-button" }, paper: { sx: { maxHeight: 600, width: 200 } } }}
+                    >
+                        {["Free", "Player"].map((mode) => (
+                            <MenuItem key={mode} selected={cameraMode === mode} onClick={() => {
+                                setCameraMode(mode);
+                                setCameraAnchor(null);
+                            }}>
+                                <VideocamIcon fontSize="small" sx={{ mr: 0.5 }} />
+                                {mode}
+                            </MenuItem>
+                        ))}
+                    </Menu>
+                </CardContent>
+            </Card>
             <GameDetailsPanel />
-
-            {/* Minimap */}
-            < Minimap />
-
-            {/* Debug */}
+            <Minimap />
             {debug && <DebugPanel />}
-
-        </div >
-    )
-
+        </Box>
+    );
 }
 
-export default memo(LeftPanelContent)
+export default memo(LeftPanelContent);

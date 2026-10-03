@@ -1,3 +1,7 @@
+"use client";
+import Box from "@mui/material/Box";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
 import { useGameStore } from "@/hooks/useGameStore"
 
 function DebugPanel() {
@@ -8,35 +12,35 @@ function DebugPanel() {
     const rotation = useGameStore(state => state.rotation)
 
     return (
-        <div className="card card-articles card-sm">
+        <Card sx={{ bgcolor: 'game.card', backgroundImage: 'none', fontSize: '0.875rem', border: 1, borderColor: 'divider' }}>
 
-            <div className="card-body">
+            <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
 
-                <div>Debug Info</div>
+                <Box>Debug Info</Box>
 
-                <div>
+                <Box>
                     Rotation: {rotation}
-                </div>
+                </Box>
 
-                <div>
+                <Box>
                     Range: {playerLocation.x}
                     Depth: {playerLocation.y}
-                </div>
+                </Box>
 
-                <div>
+                <Box>
                     Score: {score}
-                </div>
+                </Box>
 
-                <div>
+                <Box>
                     Holding Chest: {holdingChest === false ? 'No' : `Yes - ${holdingChest}`}
-                </div>
+                </Box>
 
                 {/* <div>
                         XYZ: {JSON.stringify(playerLocation)}
                     </div> */}
 
-            </div>
-        </div>
+            </CardContent>
+        </Card>
     )
 
 }
