@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useSearchParams } from "next/navigation";
 import Box from "@mui/material/Box";
 import classNames from "classnames";
 import useFullscreen from "@articles-media/articles-dev-box/useFullscreen";
@@ -8,20 +9,18 @@ import GameMenu from "@articles-media/articles-dev-box/GameMenu";
 import LeftPanelContent from "@/components/UI/LeftPanel";
 import { useStore } from "@/hooks/useStore";
 import SinglePlayerHandler from "@/components/Handlers/SinglePlayerHandler";
-import { useGameStore } from "@/hooks/useGameStore";
 import GameOverModal from "@/components/UI/GameOverModal";
 import GameTimer from "@/components/UI/GameTimer";
-import SinglePlayerGameOverDialog from "@/components/UI/SinglePlayerGameOverDialog";
 
 const GameCanvas = dynamic(() => import("@/components/Game/GameCanvas"), {
     ssr: false,
 });
 
 export default function GamePage() {
+    const server = useSearchParams().get("server");
     const sceneKey = useStore((state) => state.sceneKey);
     const showMenu = useStore((state) => state.showMenu);
     const sidebar = useStore((state) => state.sidebar);
-    const showGameOverModal = useGameStore((state) => state.showGameOverModal);
     const { isFullscreen } = useFullscreen();
 
     return (
@@ -37,12 +36,7 @@ export default function GamePage() {
             id={`${process.env.NEXT_PUBLIC_GAME_KEY}-game-page`}
             sx={{ position: "relative", display: "flex" }}
         >
-            {showGameOverModal && (
-                <GameOverModal
-                    show={showGameOverModal}
-                    setShow={useGameStore.getState().setShowGameOverModal}
-                />
-            )}
+            <GameOverModal />
             <GameMenu
                 useStore={useStore}
                 LeftPanelContent={LeftPanelContent}
@@ -53,7 +47,6 @@ export default function GamePage() {
                 sidebarConfig={{ style: "Static Panel" }}
             />
             <SinglePlayerHandler />
-            <SinglePlayerGameOverDialog />
             <Box
                 className="canvas-wrap"
                 sx={{
@@ -69,7 +62,7 @@ export default function GamePage() {
                     },
                 }}
             >
-                <GameCanvas key={sceneKey} />
+                <GameCanvas key={`${server || "single"}:${sceneKey}`} />
                 <GameTimer />
             </Box>
         </Box>

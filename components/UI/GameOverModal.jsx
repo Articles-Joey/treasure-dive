@@ -21,6 +21,9 @@ import { useGameStore } from "@/hooks/useGameStore";
 import { useScoreStore } from "@/hooks/useScoreStore";
 import ArticlesButton from "./Button";
 import Stack from "@mui/material/Stack";
+import { useSearchParams } from "next/navigation";
+import { useSocketStore } from "@/hooks/useSocketStore";
+import useGameHelpers from "@/hooks/useGameHelpers";
 
 const subscribe = () => () => {};
 const clientSnapshot = () => true;
@@ -203,7 +206,7 @@ export function SinglePlayerScoreboard({
                             onClick={onClose}
                             sx={{ mt: 1 }}
                         >
-                            Back to Menu
+                            Back to Landing
                         </ArticlesButton>
                     </Stack>
                     {onPlayAgain && (
@@ -217,60 +220,187 @@ export function SinglePlayerScoreboard({
     );
 }
 
-export default function SinglePlayerGameOverDialog() {
+export function MultiplayerScoreboard({
+    rankings = [],
+    onClose,
+    onPlayAgain,
+    canReturnToLobby,
+}) {
+    const socketId = useSocketStore((state) => state.socket?.id);
+    const rows = [...rankings].sort((a, b) => (b.score || 0) - (a.score || 0));
+    const winners = rows.filter(
+        (player) => (player.score || 0) === (rows[0]?.score || 0),
+    );
+
+    return (
+        <Box>
+            <Typography
+                variant="h6"
+                sx={{ mb: 2 }}
+            >
+                {winners.length > 1 ? "Tied for first: " : "Winner: "}
+                {winners
+                    .map((player) => player.nickname || "Unknown")
+                    .join(", ")}
+            </Typography>
+            <TableContainer>
+                <Table
+                    size="small"
+                    aria-label="Multiplayer treasure dive results"
+                >
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Rank</TableCell>
+                            <TableCell>Nickname</TableCell>
+                            <TableCell align="right">
+                                Treasures collected
+                            </TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {rows.map((player) => (
+                            <TableRow
+                                key={player.id}
+                                selected={player.id === socketId}
+                            >
+                                <TableCell>
+                                    {rows.findIndex(
+                                        (row) =>
+                                            (row.score || 0) ===
+                                            (player.score || 0),
+                                    ) + 1}
+                                </TableCell>
+                                <TableCell sx={{ overflowWrap: "anywhere" }}>
+                                    {player.nickname || "Unknown"}
+                                </TableCell>
+                                <TableCell align="right">
+                                    {player.score || 0}
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+            <Stack
+                direction="row"
+                spacing={1}
+                sx={{ mt: 2, justifyContent: "space-between" }}
+            >
+                <Stack
+                    direction="row"
+                    spacing={1}
+                >
+                    <ArticlesButton onClick={onClose}>Close</ArticlesButton>
+                    <ArticlesButton
+                        component={Link}
+                        href="/"
+                        onClick={onClose}
+                    >
+                        Back to Landing
+                    </ArticlesButton>
+                </Stack>
+                <ArticlesButton
+                    onClick={onPlayAgain}
+                    disabled={!canReturnToLobby}
+                >
+                    Play Again
+                </ArticlesButton>
+            </Stack>
+            {!canReturnToLobby && (
+                <Typography
+                    color="text.secondary"
+                    sx={{ mt: 1 }}
+                >
+                    Reconnect to the server to return to the lobby.
+                </Typography>
+            )}
+        </Box>
+    );
+}
+
+export default function GameOverModal() {
+    const server = useSearchParams().get("server");
     const result = useGameStore((state) => state.gameState.result);
     const open = useGameStore((state) => state.gameState.resultDialogOpen);
-    const close = useGameStore((state) => state.closeResultDialog);
+    const closeResultDialog = useGameStore((state) => state.closeResultDialog);
+    const multiplayerResult = useGameStore((state) => state.showGameOverModal);
+    const setShowGameOverModal = useGameStore(
+        (state) => state.setShowGameOverModal,
+    );
+    const connected = useSocketStore((state) => state.connected);
+    const socketId = useSocketStore((state) => state.socket?.id);
+    const isRoomMember = useGameStore((state) =>
+        state.gameState.players?.some((player) => player.id === socketId),
+    );
+    const { handleReturnToLobby } = useGameHelpers();
+    const canReturnToLobby = connected && isRoomMember;
+    const close = () =>
+        server ? setShowGameOverModal(false) : closeResultDialog();
 
     return (
         <Dialog
-            open={Boolean(open && result)}
+            open={Boolean(server ? multiplayerResult : open && result)}
             onClose={close}
             fullWidth
             maxWidth="sm"
-            aria-labelledby="single-player-game-over-title"
+            aria-labelledby="game-over-title"
         >
-            <DialogTitle id="single-player-game-over-title">
+            <DialogTitle id="game-over-title">
                 Game Over — Time’s up!
             </DialogTitle>
             <DialogContent>
-                <Typography variant="h6">{result?.nickname}</Typography>
-                <Typography
-                    color="text.secondary"
-                    sx={{ mb: 2 }}
-                >
-                    <ScoreDate playedAt={result?.playedAt} />
-                </Typography>
-                <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
-                    {[
-                        ["Treasures collected", result?.score],
-                        ["Obstacles hit this game", result?.obstacles_hit],
-                    ].map(([label, value]) => (
-                        <Box
-                            key={label}
-                            sx={{
-                                flex: 1,
-                                p: 2,
-                                border: 1,
-                                borderColor: "divider",
-                                borderRadius: 2,
-                            }}
+                {server ? (
+                    <MultiplayerScoreboard
+                        rankings={multiplayerResult?.rankings}
+                        onClose={close}
+                        onPlayAgain={handleReturnToLobby}
+                        canReturnToLobby={canReturnToLobby}
+                    />
+                ) : (
+                    <>
+                        <Typography variant="h6">{result?.nickname}</Typography>
+                        <Typography
+                            color="text.secondary"
+                            sx={{ mb: 2 }}
                         >
-                            <Typography color="text.secondary">
-                                {label}
-                            </Typography>
-                            <Typography variant="h4">{value ?? 0}</Typography>
+                            <ScoreDate playedAt={result?.playedAt} />
+                        </Typography>
+                        <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+                            {[
+                                ["Treasures collected", result?.score],
+                                [
+                                    "Obstacles hit this game",
+                                    result?.obstacles_hit,
+                                ],
+                            ].map(([label, value]) => (
+                                <Box
+                                    key={label}
+                                    sx={{
+                                        flex: 1,
+                                        p: 2,
+                                        border: 1,
+                                        borderColor: "divider",
+                                        borderRadius: 2,
+                                    }}
+                                >
+                                    <Typography color="text.secondary">
+                                        {label}
+                                    </Typography>
+                                    <Typography variant="h4">
+                                        {value ?? 0}
+                                    </Typography>
+                                </Box>
+                            ))}
                         </Box>
-                    ))}
-                </Box>
-
-                <SinglePlayerScoreboard
-                    highlightedResultId={result?.id}
-                    onClose={close}
-                    onPlayAgain={() => {
-                        useGameStore.getState().startSinglePlayerGame();
-                    }}
-                />
+                        <SinglePlayerScoreboard
+                            highlightedResultId={result?.id}
+                            onClose={close}
+                            onPlayAgain={() => {
+                                useGameStore.getState().startSinglePlayerGame();
+                            }}
+                        />
+                    </>
+                )}
             </DialogContent>
         </Dialog>
     );

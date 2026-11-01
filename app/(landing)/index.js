@@ -10,7 +10,7 @@ import { useSocketStore } from "@/hooks/useSocketStore";
 import { useStore } from "@/hooks/useStore";
 import { useGameStore } from "@/hooks/useGameStore";
 import { resetScores } from "@/hooks/useScoreStore";
-import { SinglePlayerScoreboard } from "@/components/UI/SinglePlayerGameOverDialog";
+import { SinglePlayerScoreboard } from "@/components/UI/GameOverModal";
 import ArticlesButton from "@/components/UI/Button";
 
 import logo from "@/app/icon.png";

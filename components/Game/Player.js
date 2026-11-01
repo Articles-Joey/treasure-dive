@@ -4,6 +4,7 @@ import { useGLTF, useAnimations, Text } from "@react-three/drei";
 import { memo, use, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Vector3 } from "three";
 import * as THREE from "three";
+import { shallow } from "zustand/shallow";
 // import { useKeyboard } from "components/Games/Epcot/hooks/useKeyboard"
 
 import { useControllerStore } from "@/hooks/useControllerStore";
@@ -59,6 +60,8 @@ function PlayerBase(props) {
     const nickname = useStore((state) => state.nickname);
     const toontownMode = useStore((state) => state.toontownMode);
     const cameraMode = useStore((state) => state.cameraMode);
+    const debugMode = useStore((state) => state.debug);
+    const sprintEnabled = process.env.NODE_ENV === "development" && debugMode;
 
     const {
         teleport,
@@ -75,22 +78,25 @@ function PlayerBase(props) {
         setHoldingChest,
         addScore,
         debug,
-    } = useGameStore((state) => ({
-        teleport: state.teleport,
-        setTeleport: state.setTeleport,
-        setPlayerLocation: state.setPlayerLocation,
-        maxHeight: state.maxHeight,
-        setMaxHeight: state.setMaxHeight,
-        shift: state.shift,
-        setShift: state.setShift,
-        addDistance: state.addDistance,
-        rotation: state.rotation,
-        setRotation: state.setRotation,
-        holdingChest: state.holdingChest,
-        setHoldingChest: state.setHoldingChest,
-        addScore: state.addScore,
-        debug: state.debug,
-    }));
+    } = useGameStore(
+        (state) => ({
+            teleport: state.teleport,
+            setTeleport: state.setTeleport,
+            setPlayerLocation: state.setPlayerLocation,
+            maxHeight: state.maxHeight,
+            setMaxHeight: state.setMaxHeight,
+            shift: state.shift,
+            setShift: state.setShift,
+            addDistance: state.addDistance,
+            rotation: state.rotation,
+            setRotation: state.setRotation,
+            holdingChest: state.holdingChest,
+            setHoldingChest: state.setHoldingChest,
+            addScore: state.addScore,
+            debug: state.debug,
+        }),
+        shallow,
+    );
 
     const status = useGameStore((state) => state.gameState.status);
 
@@ -169,7 +175,13 @@ function PlayerBase(props) {
         onCollide: (e) => {
             const gameStatePlayer = useGameStore
                 .getState()
-                .gameState?.players?.find((p) => p.id === "local");
+                .gameState?.players?.find(
+                    (p) =>
+                        p.id ===
+                        (server
+                            ? useSocketStore.getState().socket?.id
+                            : "local"),
+                );
 
             if (e?.body.userData.isEnemy) {
                 console.log("Enemy collision");
@@ -197,12 +209,6 @@ function PlayerBase(props) {
         },
     }));
 
-    const material = new THREE.MeshPhysicalMaterial({
-        color: "red",
-        opacity: 0.5,
-        transparent: true,
-    });
-
     const vel = useRef([0, 0, 0]);
     useEffect(() => {
         return api.velocity.subscribe((v) => (vel.current = v));
@@ -220,7 +226,11 @@ function PlayerBase(props) {
     useEffect(() => {
         const gameStatePlayer = useGameStore
             .getState()
-            .gameState?.players?.find((p) => p.id === "local");
+            .gameState?.players?.find(
+                (p) =>
+                    p.id ===
+                    (server ? useSocketStore.getState().socket?.id : "local"),
+            );
 
         if (gameStatePlayer?.position) {
             api.position.set(
@@ -261,12 +271,15 @@ function PlayerBase(props) {
                 (CAPSULE_LENGTH / 2) *
                     Math.abs(Math.cos(degToRad(rotationRef.current)));
             if (capsuleTop >= WATER_SURFACE_Y - 0.1) {
-                console.log("Player has surfaced");
-
                 const heldChestIndex = useGameStore
                     .getState()
-                    .gameState?.players?.find((p) => p.id === "local")
-                    ?.heldChests?.[0];
+                    .gameState?.players?.find(
+                        (p) =>
+                            p.id ===
+                            (server
+                                ? useSocketStore.getState().socket?.id
+                                : "local"),
+                    )?.heldChests?.[0];
 
                 if (heldChestIndex !== undefined) {
                     // setHoldingChest(false)
@@ -280,9 +293,8 @@ function PlayerBase(props) {
     }, [api.position, holdingChest]);
 
     useEffect(() => {
-        console.log("Shift", isShifting);
-        setShift(isShifting);
-    }, [isShifting]);
+        setShift(Boolean(isShifting && sprintEnabled));
+    }, [isShifting, sprintEnabled, setShift]);
 
     const [action, setAction] = useState("Idle");
     useEffect(() => {
@@ -416,7 +428,7 @@ function PlayerBase(props) {
         if (currentStatus === "In Progress" || gameOver) {
             if ((!stunnedRef.current || gameOver) && moveForward) {
                 const direction = new Vector3();
-                const moveSpeed = SPEED * (shift ? 2 : 0.5);
+                const moveSpeed = SPEED * (shift && sprintEnabled ? 2 : 0.5);
                 const rad = degToRad(rotationRef.current);
                 // Calculate the direction vector based on rotation
                 direction.set(
@@ -476,7 +488,7 @@ function PlayerBase(props) {
             useGameStore.getState().gameState.status !== "In Progress"
         )
             return false;
-        useGameStore.getState().recordObstacleHit();
+        if (!server) useGameStore.getState().recordObstacleHit();
         setHoldingChest(false);
         setAction("Roll");
         stunnedRef.current = true;
@@ -506,10 +518,12 @@ function PlayerBase(props) {
         }
     }, [rotation, api.rotation]);
 
-    const players = useGameStore((state) => state.gameState.players);
-    const localPlayer = server
-        ? players?.find((p) => p.id === socket?.id)
-        : players?.find((p) => p.id === "local");
+    const hasHeldChest = useGameStore(
+        (state) =>
+            (state.gameState.players?.find(
+                (p) => p.id === (server ? socket?.id : "local"),
+            )?.heldChests?.length || 0) > 0,
+    );
 
     useLayoutEffect(() => {
         const group = playerModelRef.current;
@@ -520,12 +534,13 @@ function PlayerBase(props) {
             group?.traverse((object) =>
                 object.layers.disable(PLAYER_FOREGROUND_LAYER),
             );
-    }, [toontownMode, localPlayer?.heldChests?.length]);
+    }, [toontownMode, hasHeldChest]);
 
     return (
         <group>
             <Text
                 ref={nicknameRef}
+                layers-mask={1 << PLAYER_FOREGROUND_LAYER}
                 color="black"
                 position={[0, 0, 0]}
                 scale={0.25}
@@ -556,17 +571,19 @@ function PlayerBase(props) {
                     />
                 )}
 
-                {(localPlayer?.heldChests?.length || 0) > 0 && (
+                {hasHeldChest && (
                     <HeldChest
                         position={[0, -0.2, 0.1]}
                         rotation={[0, degToRad(180), 0]}
                     />
                 )}
             </group>
-            <mesh
-                ref={ref}
-                material={material}
-            >
+            <mesh ref={ref}>
+                <meshPhysicalMaterial
+                    color="red"
+                    opacity={0.5}
+                    transparent
+                />
                 {debug && (
                     <capsuleGeometry
                         args={[CAPSULE_RADIUS, CAPSULE_LENGTH, 8, 16]}

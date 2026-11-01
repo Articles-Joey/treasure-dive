@@ -7,20 +7,24 @@ import Chip from "@mui/material/Chip";
 import { useGameStore } from "@/hooks/useGameStore";
 import ArticlesButton from "./Button";
 import useGameHelpers from "@/hooks/useGameHelpers";
-import { useScoreStore } from "@/hooks/useScoreStore";
 import { useSocketStore } from "@/hooks/useSocketStore";
-import { ScoreDate } from "./SinglePlayerGameOverDialog";
 import Stack from "@mui/material/Stack";
+import { useSearchParams } from "next/navigation";
 
 export default function GameDetailsPanel() {
+    const server = useSearchParams().get("server");
+    const connected = useSocketStore((state) => state.connected);
+    const socketId = useSocketStore((state) => state.socket?.id);
+    const playerCount = useGameStore(
+        (state) => state.gameState.players?.length || 0,
+    );
+    const isRoomMember = useGameStore((state) =>
+        state.gameState.players?.some((p) => p.id === socketId),
+    );
+    const multiplayerError = useGameStore((state) => state.multiplayerError);
+    const canStart = !server || (connected && playerCount >= 2 && isRoomMember);
     const status = useGameStore((state) => state.gameState.status);
-    const timer = useGameStore((state) => state.gameState.timer);
     const score = useGameStore((state) => state.score);
-    const obstaclesHit = useGameStore((state) => state.obstacles_hit);
-    const lifetimeHits = useScoreStore((state) => state.obstacles_hit);
-    const startedAt = useGameStore((state) => state.gameState.startedAt);
-    const result = useGameStore((state) => state.gameState.result);
-    const playerLocation = useGameStore((state) => state.playerLocation);
     const { handleGameStart } = useGameHelpers();
     const isGameInProgress = status === "In Progress";
 
@@ -43,25 +47,34 @@ export default function GameDetailsPanel() {
                     <Box>Status: {status}</Box>
                     <Box>Score: {score}</Box>
                 </Stack>
-                {/* <Box>Timer: {timer}</Box> */}
-                {/* <Box>
-                    Range: {playerLocation?.x?.toFixed(2) ?? "0.00"} | Depth: {playerLocation?.y?.toFixed(2) ?? "0.00"}
-                </Box> */}
-                {/* <Box>Obstacles hit this game: {obstaclesHit}</Box> */}
-                {/* <Box>Lifetime obstacles hit: {lifetimeHits}</Box> */}
-                {/* {startedAt && <Box>Started: <ScoreDate playedAt={startedAt} /></Box>} */}
-                {/* {result && <Box>Finished by {result.nickname}: <ScoreDate playedAt={result.playedAt} /></Box>} */}
-                <ArticlesButton
-                    small
+                <Stack
+                    direction="row"
+                    spacing={1}
                     sx={{
-                        width: "100%",
-                        mb: 1,
+                        flex: 1,
+                        justifyContent: "space-between",
                     }}
-                    disabled={isGameInProgress}
-                    onClick={() => handleGameStart()}
                 >
-                    {isGameInProgress ? "Game In Progress" : "Start Game"}
-                </ArticlesButton>
+                    <ArticlesButton
+                        small
+                        sx={{
+                            width: "100%",
+                        }}
+                        // disabled={isGameInProgress || !canStart}
+                        onClick={() => handleGameStart()}
+                    >
+                        {isGameInProgress ? "Game In Progress" : "Start Game"}
+                    </ArticlesButton>
+                </Stack>
+                {server && (
+                    <Box>
+                        {multiplayerError ||
+                            (!connected
+                                ? "Connecting to server…"
+                                : `${playerCount}/4 players · At least 2 needed to start`)}
+                    </Box>
+                )}
+
                 <Players />
             </CardContent>
         </Card>
@@ -74,7 +87,11 @@ function Players() {
     const socketId = useSocketStore((state) => state.socket?.id);
 
     return (
-        <Box>
+        <Box
+            sx={{
+                mt: 1,
+            }}
+        >
             <Box>Players</Box>
             {players?.map((player, index) => (
                 <Box

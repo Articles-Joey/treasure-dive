@@ -1,10 +1,24 @@
 import { useSearchParams } from "next/navigation";
 import { useGameStore } from "./useGameStore";
+import { useSocketStore } from "./useSocketStore";
+import { useRef } from "react";
 
 export default function useGameHelpers() {
     const searchParams = useSearchParams();
     const params = Object.fromEntries(searchParams.entries());
     const { server } = params;
+    const lastMove = useRef(0);
+    const lastSentMove = useRef(null);
+    function send(action, details = {}) {
+        const socket = useSocketStore.getState().socket;
+        const game = useGameStore.getState().gameState;
+        if (!socket?.connected || String(game.server_id) !== server) return;
+        socket.emit(`game:treasure-dive:${action}`, {
+            server,
+            roundId: game.id,
+            ...details,
+        });
+    }
 
     function handleChestPickup(player_id, chestIndex) {
         console.log(
@@ -14,7 +28,7 @@ export default function useGameHelpers() {
             chestIndex,
         );
         if (server) {
-            // Not ready
+            send("pickup", { chestIndex });
         } else {
             console.log(
                 "handleChestPickup - Single Player Mode - Chest Index:",
@@ -62,7 +76,7 @@ export default function useGameHelpers() {
     function handleChestDrop(player_id) {
         console.log("handleChestDrop called with player_id:", player_id);
         if (server) {
-            // Not ready
+            send("drop");
         } else {
             console.log(
                 "handleChestDrop - Single Player Mode - Player ID:",
@@ -104,21 +118,28 @@ export default function useGameHelpers() {
     }
 
     function handlePlayerMove(player_id, newPosition) {
-        console.log(
-            "handlePlayerMove called with player_id:",
-            player_id,
-            "newPosition:",
-            newPosition,
-        );
         if (server) {
-            // Not ready
+            const { gameState, rotation } = useGameStore.getState();
+            if (gameState.status !== "In Progress") return;
+            if (Date.now() - lastMove.current < 50) return;
+            const previous = lastSentMove.current;
+            if (
+                previous?.roundId === gameState.id &&
+                previous.rotation === rotation &&
+                newPosition.every(
+                    (value, index) =>
+                        Math.abs(value - previous.position[index]) < 0.001,
+                )
+            )
+                return;
+            lastMove.current = Date.now();
+            lastSentMove.current = {
+                roundId: gameState.id,
+                position: [...newPosition],
+                rotation,
+            };
+            send("position", { position: newPosition, rotation });
         } else {
-            console.log(
-                "handlePlayerMove - Single Player Mode - Player ID:",
-                player_id,
-                "New Position:",
-                newPosition,
-            );
             const gameState = useGameStore.getState().gameState;
             if (!gameState?.players) return;
 
@@ -137,11 +158,15 @@ export default function useGameHelpers() {
         }
     }
 
+    function handleReturnToLobby() {
+        if (server) send("return-to-lobby");
+    }
+
     function handleGameStart() {
         console.log("handleGameStart called");
 
         if (server) {
-            // Not ready
+            send("start-game");
         } else {
             console.log("handleGameStart - Single Player Mode");
             useGameStore.getState().startSinglePlayerGame();
@@ -156,7 +181,7 @@ export default function useGameHelpers() {
             chestIndex,
         );
         if (server) {
-            // Not ready
+            send("claim", { chestIndex });
         } else {
             console.log(
                 "handleChestClaim - Single Player Mode - Player ID:",
@@ -214,6 +239,7 @@ export default function useGameHelpers() {
         handleChestDrop,
         handlePlayerMove,
         handleGameStart,
+        handleReturnToLobby,
         handleChestClaim,
     };
 }

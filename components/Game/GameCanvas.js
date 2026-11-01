@@ -12,6 +12,7 @@ import Sand from "./Sand";
 import SeabedDecorations from "./SeabedDecorations";
 
 import PlayerBase from "./Player";
+import Players from "./Players";
 import PlayerForeground from "./PlayerForeground";
 import Obstacles from "./Obstacles";
 import Chests from "./Chests";
@@ -149,6 +150,7 @@ function GameCanvas(props) {
                             />
 
                             <PlayerBase />
+                            <Players />
 
                             <Obstacles />
 
