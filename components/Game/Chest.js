@@ -4,36 +4,58 @@ Command: npx gltfjsx@6.5.2 models\chest.gltf --output output\chest.js --transfor
 Files: models\chest.gltf [6.5KB] > F:\My Documents\Articles Media\AMCOT\Models\Kenny\kenney_pirate-kit\JSX\output\chest-transformed.glb [3.81KB] (41%)
 */
 
-import { useGLTF } from '@react-three/drei'
-import { useSphere } from '@react-three/cannon';
-import { degToRad } from 'three/src/math/MathUtils.js';
+import { useGLTF } from "@react-three/drei";
+import useChestMaterials from "@/hooks/useChestMaterials";
+import { useSphere } from "@react-three/cannon";
+import { degToRad } from "three/src/math/MathUtils.js";
 const link = `${process.env.NEXT_PUBLIC_CDN}games/Assets/KennyNL/Pirate/Models/chest.glb`;
 
 export function Chest(props) {
+    const { nodes, materials } = useGLTF(link);
+    const darkMaterials = useChestMaterials(materials);
 
-  const { nodes, materials } = useGLTF(link)
+    const [ref, api] = useSphere(() => ({
+        // mass: 0,
+        // type: 'Dynamic',
+        isTrigger: true,
+        args: [0.5, 0.5, 0.5],
+        position: props.position,
+        rotation: props.rotation || [0, 0, 0],
+        userData: {
+            isChest: true,
+            index: props.obj_i,
+        },
+    }));
 
-  const [ref, api] = useSphere(() => ({
-    // mass: 0,
-    // type: 'Dynamic',
-    isTrigger: true,
-    args: [0.5, 0.5, 0.5],
-    position: props.position,
-    // rotation: [0, degToRad(-90), 0],
-    userData: {
-      isChest: true,
-      index: props.obj_i
-    }
-  }))
-
-  return (
-    <group ref={ref} {...props} dispose={null}>
-      <group name="chest_1" position={[0, -0.25, 0]} scale={0.64}>
-        <mesh name="chest_2" castShadow receiveShadow geometry={nodes.chest_2.geometry} material={materials.wood} />
-        <mesh name="chest_3" castShadow receiveShadow geometry={nodes.chest_3.geometry} material={materials.stone} />
-      </group>
-    </group>
-  )
+    return (
+        <group
+            ref={ref}
+            {...props}
+            dispose={null}
+            // rotation={}
+        >
+            <group
+                name="chest_1"
+                position={[0, -0.25, 0]}
+                scale={0.64}
+            >
+                <mesh
+                    name="chest_2"
+                    castShadow
+                    receiveShadow
+                    geometry={nodes.chest_2.geometry}
+                    material={darkMaterials.wood}
+                />
+                <mesh
+                    name="chest_3"
+                    castShadow
+                    receiveShadow
+                    geometry={nodes.chest_3.geometry}
+                    material={darkMaterials.stone}
+                />
+            </group>
+        </group>
+    );
 }
 
-useGLTF.preload(link)
+useGLTF.preload(link);

@@ -8,53 +8,132 @@ Source: https://sketchfab.com/3d-models/donalds-boat-e1021848b7534b19a72b6803bed
 Title: donalds_boat
 */
 
-import React from 'react'
-import { useGLTF } from '@react-three/drei'
-import { useStore } from '@/hooks/useStore'
+import React from "react";
+import { useGLTF } from "@react-three/drei";
+import { useStore } from "@/hooks/useStore";
 
 export function ModelDonaldsBoat(props) {
+    const darkMode = useStore((state) => state.darkMode);
 
-  const darkMode = useStore((state) => state.darkMode)
-  
-  const { nodes, materials } = useGLTF('models/DonaldsBoat-transformed.glb')
-  // Helper to darken material if darkMode
-  function getMaterial(mat) {
-    if (!darkMode) return mat
-    // Clone material to avoid mutating shared instance
-    const darkMat = mat.clone()
-    if (darkMat.color) {
-      darkMat.color.multiplyScalar(0.25)
+    const { nodes, materials } = useGLTF("models/DonaldsBoat-transformed.glb");
+    // Helper to darken material if darkMode
+    function getMaterial(mat) {
+        if (!darkMode) return mat;
+        // Clone material to avoid mutating shared instance
+        const darkMat = mat.clone();
+        if (darkMat.color) {
+            darkMat.color.multiplyScalar(0.25);
+        }
+        if (darkMat.emissive) {
+            darkMat.emissive.multiplyScalar(0.25);
+        }
+        return darkMat;
     }
-    if (darkMat.emissive) {
-      darkMat.emissive.multiplyScalar(0.25)
-    }
-    return darkMat
-  }
 
-  return (
-    <group {...props} dispose={null} scale={20}>
-      <mesh geometry={nodes.above_water_Shader14_0.geometry} material={getMaterial(materials.Shader14)} scale={0.01} />
-      <mesh geometry={nodes.above_water_Shader15_0.geometry} material={getMaterial(materials.Shader15)} scale={0.01} />
-      {/* Slight tweak from 0.01 to avoid zindex flash */}
-      <mesh geometry={nodes.above_water_Shader11_0.geometry} material={getMaterial(materials.Shader11)} scale={0.00992} />
-      <mesh geometry={nodes.decals_Shader16_0.geometry} material={getMaterial(materials.Shader16)} scale={0.01} />
-      <mesh geometry={nodes.decals_Shader_0.geometry} material={getMaterial(materials.Shader)} scale={0.01} />
-      <mesh geometry={nodes.decals_Shader3_0.geometry} material={getMaterial(materials.Shader3)} scale={0.01} />
-      <mesh geometry={nodes.below_water_Shader10_0.geometry} material={getMaterial(materials.Shader10)} scale={0.01} />
-      <mesh geometry={nodes.o3_lambert9_0.geometry} material={getMaterial(materials.lambert9)} scale={0.01} />
-      <mesh geometry={nodes.ground_Shader2_0.geometry} material={getMaterial(materials.Shader2)} scale={0.01} />
-      <mesh geometry={nodes.wheel_house_walls_exterior_Shader6_0.geometry} material={getMaterial(materials.Shader6)} scale={0.01} />
-      <mesh geometry={nodes.wheel_house_walls_exterior_Shader7_0.geometry} material={getMaterial(materials.Shader7)} scale={0.01} />
-      <mesh geometry={nodes.wheel_house_walls_exterior_Shader8_0.geometry} material={getMaterial(materials.Shader8)} scale={0.01} />
-      <mesh geometry={nodes.wheel_house_walls_exterior_Shader9_0.geometry} material={getMaterial(materials.Shader9)} scale={0.01} />
-      <mesh geometry={nodes.wheel_house_roof_Shader12_0.geometry} material={getMaterial(materials.Shader12)} scale={0.01} />
-      <mesh geometry={nodes.wheel_house_steam_pipe_Shader13_0.geometry} material={getMaterial(materials.Shader13)} scale={0.01} />
-      <mesh geometry={nodes.boat_whistle_Shader5_0.geometry} material={getMaterial(materials.Shader5)} scale={0.01} />
-      <mesh geometry={nodes.wheel_Shader4_0.geometry} material={getMaterial(materials.Shader4)} scale={0.01} />
-      <mesh geometry={nodes.wheel_house_front_wall_Shader1_0.geometry} material={getMaterial(materials.Shader1)} scale={0.01} />
-      <mesh geometry={nodes.window_frame_Shader17_0.geometry} material={getMaterial(materials.Shader17)} scale={0.01} />
-    </group>
-  )
+    return (
+        <group
+            {...props}
+            dispose={null}
+            scale={20}
+        >
+            <mesh
+                geometry={nodes.above_water_Shader14_0.geometry}
+                material={getMaterial(materials.Shader14)}
+                scale={0.01}
+            />
+            <mesh
+                geometry={nodes.above_water_Shader15_0.geometry}
+                material={getMaterial(materials.Shader15)}
+                scale={0.01}
+            />
+            {/* Slight tweak from 0.01 to avoid zindex flash */}
+            <mesh
+                geometry={nodes.above_water_Shader11_0.geometry}
+                material={getMaterial(materials.Shader11)}
+                scale={0.00992}
+            />
+            <mesh
+                geometry={nodes.decals_Shader16_0.geometry}
+                material={getMaterial(materials.Shader16)}
+                scale={0.01}
+            />
+            <mesh
+                geometry={nodes.decals_Shader_0.geometry}
+                material={getMaterial(materials.Shader)}
+                scale={0.01}
+            />
+            <mesh
+                geometry={nodes.decals_Shader3_0.geometry}
+                material={getMaterial(materials.Shader3)}
+                scale={0.01}
+            />
+            <mesh
+                geometry={nodes.below_water_Shader10_0.geometry}
+                material={getMaterial(materials.Shader10)}
+                scale={0.01}
+            />
+            <mesh
+                geometry={nodes.o3_lambert9_0.geometry}
+                material={getMaterial(materials.lambert9)}
+                scale={0.01}
+            />
+            <mesh
+                geometry={nodes.ground_Shader2_0.geometry}
+                material={getMaterial(materials.Shader2)}
+                scale={0.01}
+            />
+            <mesh
+                geometry={nodes.wheel_house_walls_exterior_Shader6_0.geometry}
+                material={getMaterial(materials.Shader6)}
+                scale={0.01}
+            />
+            <mesh
+                geometry={nodes.wheel_house_walls_exterior_Shader7_0.geometry}
+                material={getMaterial(materials.Shader7)}
+                scale={0.01}
+            />
+            <mesh
+                geometry={nodes.wheel_house_walls_exterior_Shader8_0.geometry}
+                material={getMaterial(materials.Shader8)}
+                scale={0.01}
+            />
+            <mesh
+                geometry={nodes.wheel_house_walls_exterior_Shader9_0.geometry}
+                material={getMaterial(materials.Shader9)}
+                scale={0.01}
+            />
+            <mesh
+                geometry={nodes.wheel_house_roof_Shader12_0.geometry}
+                material={getMaterial(materials.Shader12)}
+                scale={0.01}
+            />
+            <mesh
+                geometry={nodes.wheel_house_steam_pipe_Shader13_0.geometry}
+                material={getMaterial(materials.Shader13)}
+                scale={0.01}
+            />
+            <mesh
+                geometry={nodes.boat_whistle_Shader5_0.geometry}
+                material={getMaterial(materials.Shader5)}
+                scale={0.01}
+            />
+            <mesh
+                geometry={nodes.wheel_Shader4_0.geometry}
+                material={getMaterial(materials.Shader4)}
+                scale={0.01}
+            />
+            <mesh
+                geometry={nodes.wheel_house_front_wall_Shader1_0.geometry}
+                material={getMaterial(materials.Shader1)}
+                scale={0.01}
+            />
+            <mesh
+                geometry={nodes.window_frame_Shader17_0.geometry}
+                material={getMaterial(materials.Shader17)}
+                scale={0.01}
+            />
+        </group>
+    );
 }
 
-useGLTF.preload('models/DonaldsBoat-transformed.glb')
+useGLTF.preload("models/DonaldsBoat-transformed.glb");

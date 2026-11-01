@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useStore } from "@/hooks/useStore";
 
@@ -9,9 +9,16 @@ import { ModelKennyNLPirateShipDark } from "@/components/Models/ship_dark";
 import { ModelDonaldDuck } from "@/components/Models/DonaldDuck";
 
 export default function Boat() {
-
     const groupRef = useRef();
-    const toontownMode = useStore(state => state.toontownMode)
+    const toontownMode = useStore((state) => state.toontownMode);
+
+    useLayoutEffect(() => {
+        groupRef.current?.traverse((object) => {
+            if (!object.isMesh) return;
+            object.castShadow = true;
+            object.receiveShadow = true;
+        });
+    }, [toontownMode]);
 
     useFrame((state) => {
         const t = state.clock.getElapsedTime();
@@ -32,8 +39,7 @@ export default function Boat() {
 
     return (
         <group ref={groupRef}>
-
-            {toontownMode ?
+            {toontownMode ? (
                 <>
                     <group>
                         <ModelDonaldsBoat
@@ -47,14 +53,14 @@ export default function Boat() {
                         />
                     </group>
                 </>
-                :
+            ) : (
                 <>
                     <ModelKennyNLPirateShipDark
                         position={[-0, -0.25, 0]}
                         rotation={[0, degToRad(90), 0]}
                     />
                 </>
-            }
+            )}
         </group>
-    )
+    );
 }

@@ -1,51 +1,78 @@
-import { createContext, createRef, forwardRef, memo, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useMemo } from "react";
+import { useGLTF } from "@react-three/drei";
+import { Euler, Matrix4, Vector3 } from "three";
+import { ModelRock, ROCK_MODEL_SCALE, ROCK_MODEL_URL } from "../Models/Rock";
+import { BOARD_HEIGHT, BOARD_WIDTH, WATER_SURFACE_Y } from "./board";
 
-import { NearestFilter, RepeatWrapping, TextureLoader, Vector3 } from "three";
+export default function RockSegments({
+    width = BOARD_WIDTH,
+    height = BOARD_HEIGHT,
+}) {
+    const { nodes } = useGLTF(ROCK_MODEL_URL);
+    const rockBounds = useMemo(() => {
+        const geometry = nodes.Rock_4.geometry;
+        geometry.computeBoundingBox();
+        return geometry.boundingBox
+            .clone()
+            .applyMatrix4(
+                new Matrix4().makeScale(
+                    ROCK_MODEL_SCALE,
+                    ROCK_MODEL_SCALE,
+                    ROCK_MODEL_SCALE,
+                ),
+            );
+    }, [nodes]);
 
-import { ModelRock } from "../Models/Rock";
-
-export default function RockSegments() {
-
-    const segments = useMemo(() => {
-        return [
-            2 / 3, // Top
-            0,     // Middle
-            1 / 3, // Bottom
-        ].map((offsetX) => {
-            const t = texture.clone()
-            t.repeat.set(1 / 3, 1)
-            t.offset.set(offsetX, 0)
-            t.wrapS = t.wrapT = RepeatWrapping
-            t.magFilter = t.minFilter = NearestFilter
-            t.needsUpdate = true
-            return t
-        })
-    }, [texture])
-
-    // Define X positions per segment (index correspond to segments)
-    const segmentXPositions = [
-        [-8, 8], // Top segment X positions
-        [-8, 8], // Middle segment X positions
-        [-8, 8]  // Bottom segment X positions
-    ]
-    const yPositions = [-12, -20, -31]
+    const rocks = useMemo(() => {
+        const result = [];
+        for (const side of [-1, 1]) {
+            let top = WATER_SURFACE_Y;
+            let row = 0;
+            while (top > -height) {
+                const rotation = [
+                    (Math.random() - 0.5) * 0.3,
+                    (Math.random() - 0.5) * 0.7,
+                    (Math.random() - 0.5) * 0.45,
+                ];
+                const transform = new Matrix4()
+                    .makeRotationFromEuler(new Euler(...rotation))
+                    .scale(new Vector3(side, 1, 1));
+                const bounds = rockBounds.clone().applyMatrix4(transform);
+                const rockHeight = bounds.max.y - bounds.min.y;
+                if (row === 0) {
+                    // Cap each column with a rock centered on the waterline.
+                    result.push({
+                        key: `surface-${side}`,
+                        position: [
+                            side * (width / 2 + 1),
+                            WATER_SURFACE_Y - (bounds.min.y + bounds.max.y) / 2,
+                            1.5,
+                        ],
+                        scale: [side, 1, 1],
+                        rotation,
+                    });
+                }
+                result.push({
+                    key: `${row++}-${side}`,
+                    position: [side * (width / 2 + 1), top - bounds.max.y, 1.5],
+                    scale: [side, 1, 1],
+                    rotation,
+                });
+                // Overlap the measured, rotated rocks and cap spacing for a dense wall.
+                top -= Math.max(0.05, Math.min(2, rockHeight * 0.65));
+            }
+        }
+        return result;
+    }, [width, height, rockBounds]);
 
     return (
         <group>
-            {yPositions.map((y, i) => (
-                <group key={`row-${i}`}>
-                    {segmentXPositions[i].map((x, j) => (
-                        
-                        <ModelRock 
-                            key={`rock-segment-${i}-${j}`}
-                            position={[x, y, 1.5]}
-                            scale={[x < 0 ? -1 : 1, 5, 1]}
-                        />
-
-                    ))}
-                </group>
+            {rocks.map(({ key, ...props }) => (
+                <ModelRock
+                    key={key}
+                    {...props}
+                />
             ))}
         </group>
-    )
-
+    );
 }

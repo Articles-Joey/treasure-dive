@@ -35,4 +35,4 @@ Inspired by the Treasure Dive trolley game from Toontown Online
 [Rock Model - Quaternius](https://poly.pizza/m/R2UjZAX3By)  
 [Fish Models - Quaternius](https://quaternius.com/packs/cutefish.html)  
 [Player Model - mixamo](https://www.mixamo.com/)  
-[Ship Model - Kenney](https://poly.pizza/u/Kenney)  
+[Ship Model - Kenney](https://poly.pizza/u/Kenney)

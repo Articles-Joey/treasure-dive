@@ -4,28 +4,41 @@ Command: npx gltfjsx@6.5.3 Rock.glb -T
 Files: Rock.glb [28.99KB] > F:\My Documents\Sites games\treasure-dive\public\models\Rock-transformed.glb [6.67KB] (77%)
 */
 
-import React, { useMemo } from 'react'
-import { useGLTF } from '@react-three/drei'
-import * as THREE from 'three'
+import React, { useEffect, useMemo } from "react";
+import { useGLTF } from "@react-three/drei";
+import * as THREE from "three";
 
+export const ROCK_MODEL_URL = "/models/Rock-transformed.glb";
+export const ROCK_MODEL_SCALE = 100;
 
 export function ModelRock(props) {
-  const { nodes, materials } = useGLTF('models/Rock-transformed.glb')
+    const { nodes, materials } = useGLTF(ROCK_MODEL_URL);
 
-  // Clone and override material color only once
-  const rockMaterial = useMemo(() => {
-    if (!materials.Atlas) return undefined;
-    const mat = materials.Atlas.clone();
-    // Shift color 100% towards the target to keep original shading/texture influence
-    mat.color.lerp(new THREE.Color('#e6ff03'), 1);
-    return mat;
-  }, [materials.Atlas]);
+    // Clone and override material color only once
+    const rockMaterial = useMemo(() => {
+        if (!materials.Atlas) return undefined;
+        const mat = materials.Atlas.clone();
+        // Shift color 100% towards the target to keep original shading/texture influence
+        mat.color.lerp(new THREE.Color("#e6ff03"), 1);
+        return mat;
+    }, [materials.Atlas]);
 
-  return (
-    <group {...props} dispose={null}>
-      <mesh geometry={nodes.Rock_4.geometry} material={rockMaterial} scale={100} />
-    </group>
-  )
+    useEffect(() => () => rockMaterial?.dispose(), [rockMaterial]);
+
+    return (
+        <group
+            {...props}
+            dispose={null}
+        >
+            <mesh
+                castShadow
+                receiveShadow
+                geometry={nodes.Rock_4.geometry}
+                material={rockMaterial}
+                scale={ROCK_MODEL_SCALE}
+            />
+        </group>
+    );
 }
 
-useGLTF.preload('models/Rock-transformed.glb')
+useGLTF.preload(ROCK_MODEL_URL);

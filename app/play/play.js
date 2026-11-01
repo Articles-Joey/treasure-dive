@@ -10,8 +10,12 @@ import { useStore } from "@/hooks/useStore";
 import SinglePlayerHandler from "@/components/Handlers/SinglePlayerHandler";
 import { useGameStore } from "@/hooks/useGameStore";
 import GameOverModal from "@/components/UI/GameOverModal";
+import GameTimer from "@/components/UI/GameTimer";
+import SinglePlayerGameOverDialog from "@/components/UI/SinglePlayerGameOverDialog";
 
-const GameCanvas = dynamic(() => import("@/components/Game/GameCanvas"), { ssr: false });
+const GameCanvas = dynamic(() => import("@/components/Game/GameCanvas"), {
+    ssr: false,
+});
 
 export default function GamePage() {
     const sceneKey = useStore((state) => state.sceneKey);
@@ -22,34 +26,51 @@ export default function GamePage() {
 
     return (
         <Box
-            className={classNames(`${process.env.NEXT_PUBLIC_GAME_KEY}-game-page`, {
-                "menu-open": showMenu,
-                fullscreen: isFullscreen,
-                "show-sidebar": sidebar,
-            })}
+            className={classNames(
+                `${process.env.NEXT_PUBLIC_GAME_KEY}-game-page`,
+                {
+                    "menu-open": showMenu,
+                    fullscreen: isFullscreen,
+                    "show-sidebar": sidebar,
+                },
+            )}
             id={`${process.env.NEXT_PUBLIC_GAME_KEY}-game-page`}
             sx={{ position: "relative", display: "flex" }}
         >
             {showGameOverModal && (
-                <GameOverModal show={showGameOverModal} setShow={useGameStore.getState().setShowGameOverModal} />
+                <GameOverModal
+                    show={showGameOverModal}
+                    setShow={useGameStore.getState().setShowGameOverModal}
+                />
             )}
             <GameMenu
                 useStore={useStore}
                 LeftPanelContent={LeftPanelContent}
-                menuBarConfig={{ style: "Corner Button", menuBarButtonPosition: "Left" }}
+                menuBarConfig={{
+                    style: "Corner Button",
+                    menuBarButtonPosition: "Left",
+                }}
                 sidebarConfig={{ style: "Static Panel" }}
             />
             <SinglePlayerHandler />
+            <SinglePlayerGameOverDialog />
             <Box
                 className="canvas-wrap"
                 sx={{
                     position: "relative",
                     width: "100vw",
                     height: "100vh",
-                    "& canvas": { position: "absolute", width: "100%", height: "100%", left: 0, top: 0 },
+                    "& canvas": {
+                        position: "absolute",
+                        width: "100%",
+                        height: "100%",
+                        left: 0,
+                        top: 0,
+                    },
                 }}
             >
                 <GameCanvas key={sceneKey} />
+                <GameTimer />
             </Box>
         </Box>
     );

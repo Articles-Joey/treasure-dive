@@ -4,16 +4,22 @@ Command: npx gltfjsx@6.5.3 Boat.glb -T
 Files: Boat.glb [247.21KB] > F:\My Documents\Sites games\ice-slide\public\models\Boat-transformed.glb [47.03KB] (81%)
 */
 
-import React from 'react'
-import { useGLTF } from '@react-three/drei'
+import React from "react";
+import { useGLTF } from "@react-three/drei";
 
 export function ModelBoat(props) {
-  const { nodes, materials } = useGLTF('models/Boat-transformed.glb')
-  return (
-    <group {...props} dispose={null}>
-      <mesh geometry={nodes.Boat.geometry} material={materials.lambert3SG} />
-    </group>
-  )
+    const { nodes, materials } = useGLTF("models/Boat-transformed.glb");
+    return (
+        <group
+            {...props}
+            dispose={null}
+        >
+            <mesh
+                geometry={nodes.Boat.geometry}
+                material={materials.lambert3SG}
+            />
+        </group>
+    );
 }
 
-useGLTF.preload('models/Boat-transformed.glb')
+useGLTF.preload("models/Boat-transformed.glb");

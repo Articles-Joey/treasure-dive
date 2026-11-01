@@ -7,13 +7,14 @@ import { ModelDonaldsBoat } from "../Models/DonaldsBoat";
 import { useStore } from "@/hooks/useStore";
 
 export default function RotatingMascot() {
-
-    const toontownMode = useStore(state => state.toontownMode)
+    const toontownMode = useStore((state) => state.toontownMode);
 
     return (
-        <Box className="rotating-mascot-container" sx={{ width: "100%", height: "100%" }}>
+        <Box
+            className="rotating-mascot-container"
+            sx={{ width: "100%", height: "100%" }}
+        >
             <Canvas shadows>
-
                 <group position={[0, 0, 0]}>
                     <OrbitControls
                         autoRotate
@@ -39,23 +40,19 @@ export default function RotatingMascot() {
                         shadow-mapSize-height={1024}
                     />
 
-                    {toontownMode ?
+                    {toontownMode ? (
                         <>
-                            <ModelDonaldsBoat 
-                                position={[0, -1.5, 0]}
-                            />
+                            <ModelDonaldsBoat position={[0, -1.5, 0]} />
                         </>
-                        :
+                    ) : (
                         <>
                             <ModelKennyNLPirateShipDark
                                 scale={0.7}
                                 position={[0, -2, 0]}
                             />
                         </>
-                    }
-
+                    )}
                 </group>
-
             </Canvas>
         </Box>
     );

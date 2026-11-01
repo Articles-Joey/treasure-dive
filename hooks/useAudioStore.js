@@ -1,38 +1,45 @@
-import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 const initialStore = {
-  enabled: true,
-  game_volume: 50,
-  music_volume: 50,
-}
+    enabled: true,
+    game_volume: 50,
+    music_volume: 50,
+};
 
 export const useAudioStore = create()(
-  persist(
-    (set, get) => ({
+    persist(
+        (set, get) => ({
+            _hasHydrated: false,
+            setHasHydrated: (state) => {
+                set({
+                    _hasHydrated: state,
+                });
+            },
 
-      _hasHydrated: false,
-      setHasHydrated: (state) => {
-        set({
-          _hasHydrated: state
-        });
-      },
+            audioSettings: initialStore,
+            setAudioSettings: (newValue) => set({ audioSettings: newValue }),
 
-      audioSettings: initialStore,
-      setAudioSettings: (newValue) => set({ audioSettings: newValue }),
+            resetAudioSettings: () => set({ audioSettings: initialStore }),
 
-      resetAudioSettings: () => set({ audioSettings: initialStore }),
-
-    }),
-    {
-      name: 'audio-store', // name of the item in the storage (must be unique)
-      version: 1,
-      onRehydrateStorage: () => (state) => {
-        state.setHasHydrated(true)
-      },
-      partialize: (state) => ({
-        audioSettings: state.audioSettings,
-      }),
-    },
-  ),
-)
+            toggleAudio: () => {
+                set((state) => ({
+                    audioSettings: {
+                        ...state.audioSettings,
+                        enabled: !state.audioSettings.enabled,
+                    },
+                }));
+            },
+        }),
+        {
+            name: "audio-store", // name of the item in the storage (must be unique)
+            version: 2,
+            onRehydrateStorage: () => (state) => {
+                state.setHasHydrated(true);
+            },
+            partialize: (state) => ({
+                audioSettings: state.audioSettings,
+            }),
+        },
+    ),
+);
