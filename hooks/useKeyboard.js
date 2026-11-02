@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 function actionByKey(key) {
     const keyActionMap = {
@@ -6,6 +6,9 @@ function actionByKey(key) {
         KeyS: "moveBackward",
         KeyA: "moveLeft",
         KeyD: "moveRight",
+        ArrowLeft: "moveLeft",
+        ArrowUp: "moveForward",
+        ArrowRight: "moveRight",
         Space: "jump",
         ShiftLeft: "shift",
         KeyC: "crouch",
@@ -15,6 +18,7 @@ function actionByKey(key) {
 }
 
 export const useKeyboard = () => {
+    const pressedKeys = useRef(new Set());
     const [actions, setActions] = useState({
         moveForward: false,
         moveBackward: false,
@@ -30,6 +34,8 @@ export const useKeyboard = () => {
         const action = actionByKey(e.code);
         // console.log("test")
         if (action) {
+            if (e.code.startsWith("Arrow")) e.preventDefault();
+            pressedKeys.current.add(e.code);
             setActions((prev) => {
                 return {
                     ...prev,
@@ -43,10 +49,15 @@ export const useKeyboard = () => {
         const action = actionByKey(e.code);
         // console.log("test")
         if (action) {
+            if (e.code.startsWith("Arrow")) e.preventDefault();
+            pressedKeys.current.delete(e.code);
+            const stillPressed = [...pressedKeys.current].some(
+                (key) => actionByKey(key) === action,
+            );
             setActions((prev) => {
                 return {
                     ...prev,
-                    [action]: false,
+                    [action]: stillPressed,
                 };
             });
         }

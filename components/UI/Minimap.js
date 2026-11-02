@@ -3,6 +3,13 @@ import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import { useGameStore } from "@/hooks/useGameStore";
 
+// Increase this to skip more of the image above the play area.
+const MAP_TOP_OFFSET_PERCENT = 10;
+
+function getMapTop(y) {
+    return MAP_TOP_OFFSET_PERCENT + (y / -29.5) * (100 - MAP_TOP_OFFSET_PERCENT);
+}
+
 function Minimap() {
     const playerLocation = useGameStore((state) => state.playerLocation);
     const chests = useGameStore((state) => state.gameState.chests);
@@ -10,19 +17,18 @@ function Minimap() {
     // Range: x (-6.5 to 6.5), y (0 to -29.5)
     // Map to percentage:
     // left = ((x + 6.5) / 13) * 100
-    // top = (Map area is bottom 90% of image. y=0 is top of map area, y=-29.5 is bottom)
-    // top = 10% (buffer) + ((y / -29.5) * 90%)
+    // The play area fills the image below MAP_TOP_OFFSET_PERCENT.
     const left = playerLocation ? ((playerLocation.x + 6.5) / 13) * 100 : 0;
-    const top = playerLocation ? 10 + (playerLocation.y / -29.5) * 90 : 10;
+    const top = getMapTop(playerLocation ? playerLocation.y : 0);
 
     // Helper to convert chest position array to minimap coordinates
     function getChestCoords(posArr) {
         if (!Array.isArray(posArr) || posArr.length < 2)
-            return { left: 0, top: 0 };
+            return { left: 0, top: getMapTop(0) };
         const [x, y] = posArr;
         return {
             left: ((x + 6.5) / 13) * 100,
-            top: 10 + (y / -29.5) * 90,
+            top: getMapTop(y),
         };
     }
 
@@ -35,15 +41,16 @@ function Minimap() {
                 borderColor: "divider",
                 "@media (min-width: 992px)": {
                     position: "fixed",
-                    top: "1rem",
+                    top: "50%",
+                    transform: "translateY(-50%)",
                     right: "1rem",
-                    width: 200,
+                    width: 100,
                     height: 200,
                     zIndex: 2,
                 },
             }}
         >
-            <Box sx={{ position: "relative", width: 200, mx: "auto" }}>
+            <Box sx={{ position: "relative", width: 200, maxWidth: "100%", mx: "auto" }}>
                 <Box
                     component="img"
                     src={`${process.env.NEXT_PUBLIC_CDN}games/Treasure Dive/treasure-dive-toontown-map.jpg`}
@@ -56,7 +63,7 @@ function Minimap() {
                         "@media (min-width: 992px)": {
                             width: "100%",
                             height: 200,
-                            objectFit: "cover",
+                            objectFit: "fill",
                         },
                     }}
                     width={200}
@@ -65,8 +72,8 @@ function Minimap() {
                 <Box
                     sx={{
                         position: "absolute",
-                        left: `${left}%`,
-                        top: `${top}%`,
+                        left: `clamp(7px, ${left}%, calc(100% - 7px))`,
+                        top: `clamp(7px, ${top}%, calc(100% - 7px))`,
                         width: "10px",
                         height: "10px",
                         backgroundColor: "red",
@@ -88,8 +95,8 @@ function Minimap() {
                                 key={idx}
                                 sx={{
                                     position: "absolute",
-                                    left: `${coords.left}%`,
-                                    top: `${coords.top}%`,
+                                    left: `clamp(7px, ${coords.left}%, calc(100% - 7px))`,
+                                    top: `clamp(7px, ${coords.top}%, calc(100% - 7px))`,
                                     width: "10px",
                                     height: "10px",
                                     backgroundColor: "gold",

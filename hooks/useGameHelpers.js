@@ -1,5 +1,6 @@
 import { useSearchParams } from "next/navigation";
 import { useGameStore } from "./useGameStore";
+import { useAudioStore } from "./useAudioStore";
 import { useSocketStore } from "./useSocketStore";
 import { useRef } from "react";
 
@@ -231,6 +232,7 @@ export default function useGameHelpers() {
                 gameState: newGameState,
                 score: store.score + 1,
             });
+            useAudioStore.getState().playSound("ring_get.ogg");
         }
     }
 

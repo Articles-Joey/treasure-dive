@@ -17,6 +17,12 @@ import TableSortLabel from "@mui/material/TableSortLabel";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
+import CloseIcon from "@mui/icons-material/Close";
+import HomeIcon from "@mui/icons-material/Home";
+import ReplayIcon from "@mui/icons-material/Replay";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import HistoryIcon from "@mui/icons-material/History";
+import TimerIcon from "@mui/icons-material/Timer";
 import { useGameStore } from "@/hooks/useGameStore";
 import { useScoreStore } from "@/hooks/useScoreStore";
 import ArticlesButton from "./Button";
@@ -102,8 +108,14 @@ export function SinglePlayerScoreboard({
                 }}
                 sx={{ mb: 1 }}
             >
-                <ToggleButton value="best">Best Scores</ToggleButton>
-                <ToggleButton value="recent">Recent Scores</ToggleButton>
+                <ToggleButton value="best" sx={{ gap: 1 }}>
+                    <EmojiEventsIcon fontSize="small" />
+                    Best Scores
+                </ToggleButton>
+                <ToggleButton value="recent" sx={{ gap: 1 }}>
+                    <HistoryIcon fontSize="small" />
+                    Recent Scores
+                </ToggleButton>
             </ToggleButtonGroup>
             <TableContainer>
                 <Table
@@ -196,7 +208,7 @@ export function SinglePlayerScoreboard({
                         sx={{ flex: 1, justifyContent: "flex-start" }}
                     >
                         {onClose && (
-                            <ArticlesButton onClick={onClose}>
+                            <ArticlesButton onClick={onClose} startIcon={<CloseIcon />}>
                                 Close
                             </ArticlesButton>
                         )}
@@ -204,13 +216,14 @@ export function SinglePlayerScoreboard({
                             component={Link}
                             href="/"
                             onClick={onClose}
+                            startIcon={<HomeIcon />}
                             sx={{ mt: 1 }}
                         >
                             Back to Landing
                         </ArticlesButton>
                     </Stack>
                     {onPlayAgain && (
-                        <ArticlesButton onClick={onPlayAgain}>
+                        <ArticlesButton onClick={onPlayAgain} startIcon={<ReplayIcon />}>
                             Play Again
                         </ArticlesButton>
                     )}
@@ -290,17 +303,21 @@ export function MultiplayerScoreboard({
                     direction="row"
                     spacing={1}
                 >
-                    <ArticlesButton onClick={onClose}>Close</ArticlesButton>
+                    <ArticlesButton onClick={onClose} startIcon={<CloseIcon />}>
+                        Close
+                    </ArticlesButton>
                     <ArticlesButton
                         component={Link}
                         href="/"
                         onClick={onClose}
+                        startIcon={<HomeIcon />}
                     >
                         Back to Landing
                     </ArticlesButton>
                 </Stack>
                 <ArticlesButton
                     onClick={onPlayAgain}
+                    startIcon={<ReplayIcon />}
                     disabled={!canReturnToLobby}
                 >
                     Play Again
@@ -345,7 +362,11 @@ export default function GameOverModal() {
             maxWidth="sm"
             aria-labelledby="game-over-title"
         >
-            <DialogTitle id="game-over-title">
+            <DialogTitle
+                id="game-over-title"
+                sx={{ display: "flex", alignItems: "center", gap: 1 }}
+            >
+                <TimerIcon />
                 Game Over — Time’s up!
             </DialogTitle>
             <DialogContent>

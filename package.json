@@ -1,7 +1,7 @@
 {
     "name": "treasure-dive",
     "description": "The objective is to collect as many treasure chests from the bottom of the lake and bring it back to the boat within the time limit. Fish obstacles are scattered everywhere, avoid any obstacle while bringing the treasure chest back safely.",
-    "version": "0.2.0",
+    "version": "0.4.0",
     "private": false,
     "homepage": "https://treasure-dive.articles.media",
     "packageManager": "pnpm@12.0.0",

@@ -2,9 +2,11 @@
 
 import Box from "@mui/material/Box";
 import { useGameStore } from "@/hooks/useGameStore";
+import useTouchControlsStore from "@/hooks/useTouchControlsStore";
 
 export default function GameTimer() {
     const timer = useGameStore((state) => state.gameState.timer);
+    const touchControlsEnabled = useTouchControlsStore((state) => state.enabled);
     // Use the authoritative timer for both local and server games.
     const seconds = Number.isFinite(Number(timer))
         ? Math.max(0, Math.ceil(Number(timer)))
@@ -13,14 +15,20 @@ export default function GameTimer() {
     return (
         <Box
             component="output"
+            className="game-timer hidden-in-screenshot-mode"
             role="timer"
             aria-label={`Time remaining: ${seconds} seconds`}
             aria-live="off"
             sx={{
                 position: "absolute",
                 right: "max(12px, env(safe-area-inset-right))",
-                bottom: "max(12px, env(safe-area-inset-bottom))",
-                width: "clamp(100px, 14vw, 164px)",
+                top: "max(12px, env(safe-area-inset-bottom))",
+                "@media (max-width: 480px)": {
+                    bottom: touchControlsEnabled
+                        ? "calc(max(12px, env(safe-area-inset-bottom)) + 96px)"
+                        : "max(12px, env(safe-area-inset-bottom))",
+                },
+                width: "100px",
                 aspectRatio: "1",
                 zIndex: 2,
                 pointerEvents: "none",
@@ -44,7 +52,7 @@ export default function GameTimer() {
                     color: "#000",
                     fontFamily: "Arial, Helvetica, sans-serif",
                     fontWeight: 900,
-                    fontSize: "clamp(20px, 2.7vw, 32px)",
+                    fontSize: "1.5rem",
                     fontVariantNumeric: "tabular-nums",
                     lineHeight: 1,
                     whiteSpace: "nowrap",

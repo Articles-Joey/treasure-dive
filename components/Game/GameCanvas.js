@@ -1,4 +1,4 @@
-import { memo, Suspense, useMemo } from "react";
+import { memo, Suspense, useMemo, useState } from "react";
 
 import { Canvas } from "@react-three/fiber";
 import { Sky, OrbitControls, Stats } from "@react-three/drei";
@@ -23,8 +23,9 @@ import WallGraphics from "./WallGraphics";
 import Water from "./Water";
 import { BOARD_HEIGHT, BOARD_WIDTH, PLAYER_CAMERA_DISTANCE } from "./board";
 
-function GameCanvas(props) {
+function GameCanvas({ landingAnimationMode = false }) {
     const gameHeight = BOARD_HEIGHT;
+    const [rockBounds, setRockBounds] = useState(null);
 
     const debug = useStore((state) => state.debug);
     const darkMode = useStore((state) => state.darkMode);
@@ -147,9 +148,10 @@ function GameCanvas(props) {
                             <RockSegments
                                 width={BOARD_WIDTH}
                                 height={gameHeight}
+                                onBoundsChange={setRockBounds}
                             />
 
-                            <PlayerBase />
+                            <PlayerBase cameraBounds={rockBounds} />
                             <Players />
 
                             <Obstacles />

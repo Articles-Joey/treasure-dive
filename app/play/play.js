@@ -9,18 +9,22 @@ import GameMenu from "@articles-media/articles-dev-box/GameMenu";
 import LeftPanelContent from "@/components/UI/LeftPanel";
 import { useStore } from "@/hooks/useStore";
 import SinglePlayerHandler from "@/components/Handlers/SinglePlayerHandler";
+import GameMusicHandler from "@/components/Handlers/GameMusicHandler";
 import GameOverModal from "@/components/UI/GameOverModal";
 import GameTimer from "@/components/UI/GameTimer";
+import useTouchControlsStore from "@/hooks/useTouchControlsStore";
 
 const GameCanvas = dynamic(() => import("@/components/Game/GameCanvas"), {
     ssr: false,
 });
+const TouchControls = dynamic(() => import("@/components/UI/TouchControls"), { ssr: false });
 
 export default function GamePage() {
     const server = useSearchParams().get("server");
     const sceneKey = useStore((state) => state.sceneKey);
     const showMenu = useStore((state) => state.showMenu);
     const sidebar = useStore((state) => state.sidebar);
+    const touchControlsEnabled = useTouchControlsStore((state) => state.enabled);
     const { isFullscreen } = useFullscreen();
 
     return (
@@ -47,6 +51,7 @@ export default function GamePage() {
                 sidebarConfig={{ style: "Static Panel" }}
             />
             <SinglePlayerHandler />
+            <GameMusicHandler />
             <Box
                 className="canvas-wrap"
                 sx={{
@@ -64,6 +69,7 @@ export default function GamePage() {
             >
                 <GameCanvas key={`${server || "single"}:${sceneKey}`} />
                 <GameTimer />
+                {touchControlsEnabled && <TouchControls />}
             </Box>
         </Box>
     );

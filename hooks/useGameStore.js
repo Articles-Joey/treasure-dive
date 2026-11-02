@@ -1,6 +1,7 @@
 // import { create } from 'zustand'
 import { createWithEqualityFn as create } from "zustand/traditional";
 import { useScoreStore } from "./useScoreStore";
+import { useAudioStore } from "./useAudioStore";
 import { useStore } from "./useStore";
 import createSinglePlayerGameState from "@/util/createSinglePlayerGameState";
 
@@ -69,6 +70,7 @@ export const useGameStore = create((set, get) => ({
             showGameOverModal: false,
         });
         useScoreStore.getState().addResult(result);
+        useAudioStore.getState().playSound("ring_perfect.ogg");
     },
     closeResultDialog: () =>
         set((state) => ({

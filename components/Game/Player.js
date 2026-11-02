@@ -1,4 +1,4 @@
-import { useFrame, useThree } from "@react-three/fiber";
+import { useFrame } from "@react-three/fiber";
 import { useCompoundBody } from "@react-three/cannon";
 import { useGLTF, useAnimations, Text } from "@react-three/drei";
 import { memo, use, useEffect, useLayoutEffect, useRef, useState } from "react";
@@ -9,6 +9,7 @@ import { shallow } from "zustand/shallow";
 
 import { useControllerStore } from "@/hooks/useControllerStore";
 import { useGameStore } from "@/hooks/useGameStore";
+import { useAudioStore } from "@/hooks/useAudioStore";
 
 // import ClownfishModel from "./PlayerModels/Clownfish"
 // import BoneFishModel from "./PlayerModels/BoneFish"
@@ -24,9 +25,10 @@ import { useSearchParams } from "next/navigation";
 import useTouchControlsStore from "@/hooks/useTouchControlsStore";
 import { ModelNewPlayer } from "../Models/NewPlayer";
 import ModelToonCharacter from "../Models/ModelToonCharacter";
-import { BOARD_HEIGHT, PLAYER_CAMERA_DISTANCE, WATER_SURFACE_Y } from "./board";
+import { WATER_SURFACE_Y } from "./board";
 import { useSocketStore } from "@/hooks/useSocketStore";
 import { PLAYER_FOREGROUND_LAYER } from "./PlayerForeground";
+import PlayerCamera from "./PlayerCamera";
 
 const JUMP_FORCE = 6;
 const SPEED = 4;
@@ -59,7 +61,6 @@ function PlayerBase(props) {
 
     const nickname = useStore((state) => state.nickname);
     const toontownMode = useStore((state) => state.toontownMode);
-    const cameraMode = useStore((state) => state.cameraMode);
     const debugMode = useStore((state) => state.debug);
     const sprintEnabled = process.env.NODE_ENV === "development" && debugMode;
 
@@ -100,7 +101,9 @@ function PlayerBase(props) {
 
     const status = useGameStore((state) => state.gameState.status);
 
-    const { touchControls, setTouchControls } = useTouchControlsStore();
+    const touchForward = useTouchControlsStore((state) => state.enabled && state.touchControls.up);
+    const touchLeft = useTouchControlsStore((state) => state.enabled && state.touchControls.left);
+    const touchRight = useTouchControlsStore((state) => state.enabled && state.touchControls.right);
 
     const { controllerState, setControllerState } = useControllerStore();
 
@@ -134,15 +137,16 @@ function PlayerBase(props) {
 
     const {
         moveBackward,
-        moveForward,
-        moveRight,
-        moveLeft,
+        moveForward: keyboardForward,
+        moveRight: keyboardRight,
+        moveLeft: keyboardLeft,
         jump,
         shift: isShifting,
         crouch,
     } = useKeyboard();
-
-    const { camera } = useThree();
+    const moveForward = keyboardForward || touchForward;
+    const moveLeft = keyboardLeft || touchLeft;
+    const moveRight = keyboardRight || touchRight;
 
     const {
         handleChestDrop,
@@ -366,32 +370,6 @@ function PlayerBase(props) {
 
         // addDistance(0.1)
 
-        if (cameraMode == "Player") {
-            const cameraFloor =
-                -BOARD_HEIGHT + PLAYER_CAMERA_DISTANCE * 0.45 - 1;
-            if (pos.current[1] < cameraFloor) {
-                camera.position.copy(
-                    new Vector3(
-                        0,
-                        cameraFloor,
-                        pos.current[2] + PLAYER_CAMERA_DISTANCE,
-                    ),
-                );
-                camera.lookAt(new Vector3(0, cameraFloor, pos.current[2] + 5));
-            } else {
-                camera.position.copy(
-                    new Vector3(
-                        0,
-                        pos.current[1],
-                        pos.current[2] + PLAYER_CAMERA_DISTANCE,
-                    ),
-                );
-                camera.lookAt(
-                    new Vector3(0, pos.current[1], pos.current[2] + 5),
-                );
-            }
-        }
-
         let posX = 0;
         if (pos.current[0]) {
             posX = myToFixed(pos.current[0], 2);
@@ -457,31 +435,6 @@ function PlayerBase(props) {
         }
     });
 
-    const playHitSound = () => {
-        try {
-            const ctx = new (
-                window.AudioContext || window.webkitAudioContext
-            )();
-            const oscillator = ctx.createOscillator();
-            const gainNode = ctx.createGain();
-            oscillator.connect(gainNode);
-            gainNode.connect(ctx.destination);
-            oscillator.type = "sawtooth";
-            oscillator.frequency.setValueAtTime(150, ctx.currentTime);
-            oscillator.frequency.exponentialRampToValueAtTime(
-                40,
-                ctx.currentTime + 0.3,
-            );
-            gainNode.gain.setValueAtTime(0.4, ctx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(
-                0.001,
-                ctx.currentTime + 0.3,
-            );
-            oscillator.start(ctx.currentTime);
-            oscillator.stop(ctx.currentTime + 0.3);
-        } catch (e) {}
-    };
-
     onEnemyCollisionRef.current = () => {
         if (
             stunnedRef.current ||
@@ -493,7 +446,7 @@ function PlayerBase(props) {
         setAction("Roll");
         stunnedRef.current = true;
         rollYTargetRef.current = -0.3;
-        playHitSound();
+        useAudioStore.getState().playSound("ring_miss.ogg");
         if (stunTimeoutRef.current) clearTimeout(stunTimeoutRef.current);
         stunTimeoutRef.current = setTimeout(() => {
             stunnedRef.current = false;
@@ -538,6 +491,7 @@ function PlayerBase(props) {
 
     return (
         <group>
+            <PlayerCamera positionRef={pos} bounds={props.cameraBounds} />
             <Text
                 ref={nicknameRef}
                 layers-mask={1 << PLAYER_FOREGROUND_LAYER}

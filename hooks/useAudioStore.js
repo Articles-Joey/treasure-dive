@@ -22,6 +22,20 @@ export const useAudioStore = create()(
 
             resetAudioSettings: () => set({ audioSettings: initialStore }),
 
+            playSound: async (filename) => {
+                const { enabled, game_volume } = get().audioSettings;
+                if (!enabled || typeof Audio === "undefined") return;
+                const volume = Math.max(0, Math.min(1, Number(game_volume) / 100));
+                if (!Number.isFinite(volume) || volume === 0) return;
+                try {
+                    const sound = new Audio(`/audio/${filename}`);
+                    sound.volume = volume;
+                    await sound.play();
+                } catch {
+                    // Playback may be blocked until the user interacts with the page.
+                }
+            },
+
             toggleAudio: () => {
                 set((state) => ({
                     audioSettings: {

@@ -16,6 +16,7 @@ import ArticlesButton from "@/components/UI/Button";
 import logo from "@/app/icon.png";
 
 import PageTemplateLandingPage from "@articles-media/articles-dev-box/PageTemplateLandingPage";
+import LandingBackgroundAnimation from "@/components/Game/LandingBackgroundAnimation";
 
 const RotatingMascot = dynamic(() => import("@/components/UI/RotatingMascot"), {
     ssr: false,
@@ -81,10 +82,13 @@ export default function LobbyPage() {
                     fontStyle: "normal",
                 },
                 "& .landing-hero img": {
-                    marginBottom: "-30px",
+                    marginBottom: "-25px",
                 },
                 "& .landing-hero h1": {
                     lineHeight: "1!important",
+                    fontSize: "3rem!important",
+                    color: "saddlebrown",
+                    WebkitTextStroke: "0.5px gold",
                 },
             })}
         >
@@ -95,9 +99,9 @@ export default function LobbyPage() {
                 Link={Link}
                 useRouter={useRouter}
                 logoImage={logo.src}
-                // LandingBackgroundAnimation={
-                //     <LandingBackgroundAnimation />
-                // }
+                LandingBackgroundAnimation={
+                    <LandingBackgroundAnimation />
+                }
                 // CardBodyOverride={<>
 
                 // </>}
@@ -157,6 +161,6 @@ export default function LobbyPage() {
                 disableGameScoreboard={false}
                 disableAd={process.env.NEXT_PUBLIC_ENABLE_ARTICLES !== "true"}
             />
-        </Box>
+        </Box >
     );
 }

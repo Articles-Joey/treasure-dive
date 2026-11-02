@@ -1,13 +1,15 @@
-import { useMemo } from "react";
+import { useLayoutEffect, useMemo, useRef } from "react";
 import { useGLTF } from "@react-three/drei";
-import { Euler, Matrix4, Vector3 } from "three";
+import { Box3, Euler, Matrix4, Vector3 } from "three";
 import { ModelRock, ROCK_MODEL_SCALE, ROCK_MODEL_URL } from "../Models/Rock";
 import { BOARD_HEIGHT, BOARD_WIDTH, WATER_SURFACE_Y } from "./board";
 
 export default function RockSegments({
     width = BOARD_WIDTH,
     height = BOARD_HEIGHT,
+    onBoundsChange,
 }) {
+    const groupRef = useRef();
     const { nodes } = useGLTF(ROCK_MODEL_URL);
     const rockBounds = useMemo(() => {
         const geometry = nodes.Rock_4.geometry;
@@ -65,8 +67,17 @@ export default function RockSegments({
         return result;
     }, [width, height, rockBounds]);
 
+    useLayoutEffect(() => {
+        if (!groupRef.current || !onBoundsChange) return;
+        groupRef.current.updateWorldMatrix(true, true);
+        const bounds = new Box3().setFromObject(groupRef.current, true);
+        if (!bounds.isEmpty()) {
+            onBoundsChange({ min: bounds.min.toArray(), max: bounds.max.toArray() });
+        }
+    }, [rocks, onBoundsChange]);
+
     return (
-        <group>
+        <group ref={groupRef}>
             {rocks.map(({ key, ...props }) => (
                 <ModelRock
                     key={key}

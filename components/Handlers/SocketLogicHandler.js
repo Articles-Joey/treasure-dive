@@ -6,6 +6,7 @@ import shareSnapshot from "@/util/shareSnapshot";
 import { useSocketStore } from "@/hooks/useSocketStore";
 import { useStore } from "@/hooks/useStore";
 import { useGameStore } from "@/hooks/useGameStore";
+import { useAudioStore } from "@/hooks/useAudioStore";
 
 import ReusedSocketLogicHandler from "@articles-media/articles-dev-box/ReusedSocketLogicHandler";
 
@@ -45,6 +46,9 @@ export default function SocketLogicHandler(props) {
             if (!player) return;
             const reset = !joined || previousRound !== game.id;
             const previousGame = useGameStore.getState().gameState;
+            const previousPlayer = previousGame.players?.find(
+                (p) => p.id === socket.id,
+            );
             game = shareSnapshot(previousGame, game);
             if (!reset && game === previousGame) return;
             const justFinished =
@@ -71,6 +75,12 @@ export default function SocketLogicHandler(props) {
                       : {}),
                 ...(reset ? { teleport: player.position, rotation: 0 } : {}),
             });
+            if (!reset && (player.score || 0) > (previousPlayer?.score || 0)) {
+                useAudioStore.getState().playSound("ring_get.ogg");
+            }
+            if (justFinished) {
+                useAudioStore.getState().playSound("ring_perfect.ogg");
+            }
         };
         const full = (data) => {
             if (String(data.game_id) === server)
