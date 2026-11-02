@@ -93,8 +93,8 @@ export default function LayoutClient({ children }) {
                     }}
                     infoModalConfig={{
                         previewImage: darkMode
-                            ? "img/preview.gif"
-                            : "img/preview.gif",
+                            ? "img/previews/start-dark.webp"
+                            : "img/previews/start.webp",
                         appendContent: <></>,
                     }}
                 />

@@ -17,6 +17,7 @@ import logo from "@/app/icon.png";
 
 import PageTemplateLandingPage from "@articles-media/articles-dev-box/PageTemplateLandingPage";
 import LandingBackgroundAnimation from "@/components/Game/LandingBackgroundAnimation";
+import { useAudioStore } from "@/hooks/useAudioStore";
 
 const RotatingMascot = dynamic(() => import("@/components/UI/RotatingMascot"), {
     ssr: false,
@@ -95,6 +96,7 @@ export default function LobbyPage() {
             <PageTemplateLandingPage
                 useSocketStore={useSocketStore}
                 useStore={useStore}
+                useAudioStore={useAudioStore}
                 RotatingMascot={<RotatingMascot />}
                 Link={Link}
                 useRouter={useRouter}

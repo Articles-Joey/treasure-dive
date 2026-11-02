@@ -1,9 +1,9 @@
-import { memo, Suspense, useMemo, useState } from "react";
+import { memo, Suspense, useState } from "react";
 
 import { Canvas } from "@react-three/fiber";
-import { Sky, OrbitControls, Stats } from "@react-three/drei";
+import { OrbitControls, Stats } from "@react-three/drei";
 
-import { ACESFilmicToneMapping, Object3D, PCFSoftShadowMap } from "three";
+import { ACESFilmicToneMapping, PCFSoftShadowMap } from "three";
 
 import { Debug, Physics, useBox } from "@react-three/cannon";
 import { degToRad } from "three/src/math/MathUtils";
@@ -14,6 +14,7 @@ import SeabedDecorations from "./SeabedDecorations";
 import PlayerBase from "./Player";
 import Players from "./Players";
 import PlayerForeground from "./PlayerForeground";
+import SceneLighting from "./SceneLighting";
 import Obstacles from "./Obstacles";
 import Chests from "./Chests";
 import { useStore } from "@/hooks/useStore";
@@ -28,7 +29,6 @@ function GameCanvas({ landingAnimationMode = false }) {
     const [rockBounds, setRockBounds] = useState(null);
 
     const debug = useStore((state) => state.debug);
-    const darkMode = useStore((state) => state.darkMode);
     const graphicsQuality = useStore((state) => state.graphicsQuality);
     const showStats = useStore((state) => state?.debugConfig?.showStats);
     const showPhysicsDebug = useStore(
@@ -36,11 +36,6 @@ function GameCanvas({ landingAnimationMode = false }) {
     );
     const cameraMode = useStore((state) => state.cameraMode);
     const lowQuality = String(graphicsQuality).toLowerCase() === "low";
-    const sunTarget = useMemo(() => {
-        const target = new Object3D();
-        target.position.set(0, -gameHeight / 2, -2);
-        return target;
-    }, [gameHeight]);
 
     return (
         <Canvas
@@ -61,42 +56,7 @@ function GameCanvas({ landingAnimationMode = false }) {
 
             <OrbitControls enabled={cameraMode === "Free"} />
 
-            <Sky sunPosition={darkMode ? [0, -10, 0] : [0, 10, 0]} />
-
-            <ambientLight intensity={darkMode ? 0.18 : 0.35} />
-            <hemisphereLight
-                args={[
-                    darkMode ? "#6589b9" : "#c2f3ff",
-                    "#6b6043",
-                    darkMode ? 0.5 : 1.1,
-                ]}
-            />
-            <directionalLight
-                castShadow
-                target={sunTarget}
-                color={darkMode ? "#a4c7ff" : "#fff0d1"}
-                intensity={darkMode ? 1.1 : 3}
-                position={[-15, 20, 18]}
-                shadow-mapSize={[
-                    lowQuality ? 1024 : 2048,
-                    lowQuality ? 1024 : 2048,
-                ]}
-                shadow-camera-left={-BOARD_WIDTH - 8}
-                shadow-camera-right={BOARD_WIDTH + 8}
-                shadow-camera-top={gameHeight + 8}
-                shadow-camera-bottom={-gameHeight - 8}
-                shadow-camera-near={1}
-                shadow-camera-far={110}
-                shadow-bias={-0.00015}
-                shadow-normalBias={0.035}
-                shadow-radius={3}
-            />
-            <primitive object={sunTarget} />
-            <directionalLight
-                position={[10, -10, 8]}
-                color="#68cce5"
-                intensity={darkMode ? 0.3 : 0.65}
-            />
+            <SceneLighting />
 
             <Boat />
             <PlayerForeground />
@@ -151,8 +111,12 @@ function GameCanvas({ landingAnimationMode = false }) {
                                 onBoundsChange={setRockBounds}
                             />
 
-                            <PlayerBase cameraBounds={rockBounds} />
-                            <Players />
+                            {!landingAnimationMode &&
+                                <>
+                                    <PlayerBase cameraBounds={rockBounds} />
+                                    <Players />
+                                </>
+                            }
 
                             <Obstacles />
 
@@ -191,8 +155,8 @@ function Wall({ height, position }) {
             <boxGeometry args={[1, height + 0.5, 1]} />
             <meshStandardMaterial
                 color="saddlebrown"
-                // transparent={true}
-                // opacity={0.5}
+            // transparent={true}
+            // opacity={0.5}
             />
         </mesh>
     );

@@ -33,7 +33,9 @@ Inspired by the Treasure Dive trolley game from Toontown Online
 ## Previews
 
 ![Game Preview](/public/img/previews/landing.webp)
+![Game Preview](/public/img/previews/start.webp)
 ![Game Preview](/public/img/previews/start-toon.webp)
+![Game Preview](/public/img/previews/start-dark.webp)
 ![Game Preview](/public/img/previews/mid-game-toon.webp)
 ![Game Preview](/public/img/previews/bottom-toon.webp)
 ![Game Preview](/public/img/previews/bottom.webp)

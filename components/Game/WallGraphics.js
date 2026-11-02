@@ -3,6 +3,8 @@ import { useEffect, useMemo } from "react";
 import { useTexture } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 
+import getAssetSource from "@articles-media/articles-dev-box/getAssetSource";
+
 import {
     LinearFilter,
     LinearMipmapLinearFilter,
@@ -15,7 +17,7 @@ export default function WallGraphics({
     width = BOARD_WIDTH,
     height = BOARD_HEIGHT,
 }) {
-    const texture = useTexture("/img/mg_cliff.png");
+    const texture = useTexture(getAssetSource("/img/mg_cliff.png"));
     const gl = useThree((state) => state.gl);
 
     const segments = useMemo(() => {
