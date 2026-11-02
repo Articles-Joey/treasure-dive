@@ -6,7 +6,9 @@ import useTouchControlsStore from "@/hooks/useTouchControlsStore";
 
 export default function GameTimer() {
     const timer = useGameStore((state) => state.gameState.timer);
-    const touchControlsEnabled = useTouchControlsStore((state) => state.enabled);
+    const touchControlsEnabled = useTouchControlsStore(
+        (state) => state.enabled,
+    );
     // Use the authoritative timer for both local and server games.
     const seconds = Number.isFinite(Number(timer))
         ? Math.max(0, Math.ceil(Number(timer)))

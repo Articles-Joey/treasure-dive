@@ -17,14 +17,18 @@ import useTouchControlsStore from "@/hooks/useTouchControlsStore";
 const GameCanvas = dynamic(() => import("@/components/Game/GameCanvas"), {
     ssr: false,
 });
-const TouchControls = dynamic(() => import("@/components/UI/TouchControls"), { ssr: false });
+const TouchControls = dynamic(() => import("@/components/UI/TouchControls"), {
+    ssr: false,
+});
 
 export default function GamePage() {
     const server = useSearchParams().get("server");
     const sceneKey = useStore((state) => state.sceneKey);
     const showMenu = useStore((state) => state.showMenu);
     const sidebar = useStore((state) => state.sidebar);
-    const touchControlsEnabled = useTouchControlsStore((state) => state.enabled);
+    const touchControlsEnabled = useTouchControlsStore(
+        (state) => state.enabled,
+    );
     const { isFullscreen } = useFullscreen();
 
     return (

@@ -97,9 +97,15 @@ function PlayerBase(props) {
 
     const status = useGameStore((state) => state.gameState.status);
 
-    const touchForward = useTouchControlsStore((state) => state.enabled && state.touchControls.up);
-    const touchLeft = useTouchControlsStore((state) => state.enabled && state.touchControls.left);
-    const touchRight = useTouchControlsStore((state) => state.enabled && state.touchControls.right);
+    const touchForward = useTouchControlsStore(
+        (state) => state.enabled && state.touchControls.up,
+    );
+    const touchLeft = useTouchControlsStore(
+        (state) => state.enabled && state.touchControls.left,
+    );
+    const touchRight = useTouchControlsStore(
+        (state) => state.enabled && state.touchControls.right,
+    );
 
     const controllerAxisX = useControllerStore(
         (state) => state.controllerState.axes?.[0] ?? 0,
@@ -505,7 +511,10 @@ function PlayerBase(props) {
 
     return (
         <group>
-            <PlayerCamera positionRef={pos} bounds={props.cameraBounds} />
+            <PlayerCamera
+                positionRef={pos}
+                bounds={props.cameraBounds}
+            />
             <Text
                 ref={nicknameRef}
                 layers-mask={1 << PLAYER_FOREGROUND_LAYER}

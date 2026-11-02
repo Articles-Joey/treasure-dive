@@ -16,6 +16,7 @@ import ArticlesButton from "@/components/UI/Button";
 import logo from "@/app/icon.png";
 
 import PageTemplateLandingPage from "@articles-media/articles-dev-box/PageTemplateLandingPage";
+import getAssetSource from "@articles-media/articles-dev-box/getAssetSource";
 import LandingBackgroundAnimation from "@/components/Game/LandingBackgroundAnimation";
 import { useAudioStore } from "@/hooks/useAudioStore";
 
@@ -24,6 +25,8 @@ const RotatingMascot = dynamic(() => import("@/components/UI/RotatingMascot"), {
 });
 
 export default function LobbyPage() {
+    const darkMode = useStore((state) => state.darkMode);
+    
     useEffect(() => {
         useGameStore.getState().resetSinglePlayerGame();
     }, []);
@@ -91,6 +94,9 @@ export default function LobbyPage() {
                     color: "saddlebrown",
                     WebkitTextStroke: "0.5px gold",
                 },
+                "& #landing-page-container": {
+                    flexDirection: "column",
+                }
             })}
         >
             <PageTemplateLandingPage
@@ -101,16 +107,18 @@ export default function LobbyPage() {
                 Link={Link}
                 useRouter={useRouter}
                 logoImage={logo.src}
-                LandingBackgroundAnimation={
-                    <LandingBackgroundAnimation />
-                }
+                LandingBackgroundAnimation={<LandingBackgroundAnimation />}
                 // CardBodyOverride={<>
 
                 // </>}
                 // disableHero
                 // heroOverride={<>
                 // </>}
-                backgroundImage={`${process.env.NEXT_PUBLIC_CDN}games/Treasure Dive/treasure-dive-thumbnail.png`}
+                backgroundImage={
+                    darkMode
+                        ? getAssetSource("img/previews/start-dark.webp")
+                        : getAssetSource("img/previews/start.webp")
+                }
                 singlePlayerConfig={{
                     attachServerType: "single-player",
                 }}
@@ -163,6 +171,6 @@ export default function LobbyPage() {
                 disableGameScoreboard={false}
                 disableAd={process.env.NEXT_PUBLIC_ENABLE_ARTICLES !== "true"}
             />
-        </Box >
+        </Box>
     );
 }

@@ -182,7 +182,9 @@ function PlayerCoordinates({ playerId }) {
         const isLocal = playerId === "local" || playerId === socketId;
         let previousText;
         const updateCoordinates = (state) => {
-            const player = state.gameState.players?.find((p) => p.id === playerId);
+            const player = state.gameState.players?.find(
+                (p) => p.id === playerId,
+            );
             const rotation = isLocal
                 ? state.rotation
                 : Number.isFinite(player?.rotation)

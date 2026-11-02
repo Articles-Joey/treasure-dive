@@ -72,7 +72,10 @@ export default function RockSegments({
         groupRef.current.updateWorldMatrix(true, true);
         const bounds = new Box3().setFromObject(groupRef.current, true);
         if (!bounds.isEmpty()) {
-            onBoundsChange({ min: bounds.min.toArray(), max: bounds.max.toArray() });
+            onBoundsChange({
+                min: bounds.min.toArray(),
+                max: bounds.max.toArray(),
+            });
         }
     }, [rocks, onBoundsChange]);
 

@@ -17,8 +17,12 @@ const CONTROLS = [
 function TouchControls() {
     const enabled = useTouchControlsStore((state) => state.enabled);
     const controls = useTouchControlsStore((state) => state.touchControls);
-    const setTouchControls = useTouchControlsStore((state) => state.setTouchControls);
-    const resetTouchControls = useTouchControlsStore((state) => state.resetTouchControls);
+    const setTouchControls = useTouchControlsStore(
+        (state) => state.setTouchControls,
+    );
+    const resetTouchControls = useTouchControlsStore(
+        (state) => state.resetTouchControls,
+    );
     const presses = useRef(new Map());
     const buttons = useRef({});
 
@@ -50,11 +54,17 @@ function TouchControls() {
 
         // Pointer capture keeps swimming active; hit-test the rotation buttons
         // using the finger's actual position rather than the captured target.
-        const rotation = ["left", "right"].find((action) => {
-            const bounds = buttons.current[action]?.getBoundingClientRect();
-            return bounds && event.clientX >= bounds.left && event.clientX <= bounds.right
-                && event.clientY >= bounds.top && event.clientY <= bounds.bottom;
-        }) ?? null;
+        const rotation =
+            ["left", "right"].find((action) => {
+                const bounds = buttons.current[action]?.getBoundingClientRect();
+                return (
+                    bounds &&
+                    event.clientX >= bounds.left &&
+                    event.clientX <= bounds.right &&
+                    event.clientY >= bounds.top &&
+                    event.clientY <= bounds.bottom
+                );
+            }) ?? null;
         if (press.rotation === rotation) return;
         press.rotation = rotation;
         syncControls();
@@ -72,7 +82,10 @@ function TouchControls() {
         document.addEventListener("visibilitychange", onVisibilityChange);
         return () => {
             window.removeEventListener("blur", reset);
-            document.removeEventListener("visibilitychange", onVisibilityChange);
+            document.removeEventListener(
+                "visibilitychange",
+                onVisibilityChange,
+            );
             reset();
         };
     }, [resetTouchControls]);
@@ -84,7 +97,7 @@ function TouchControls() {
             className="touch-controls-area hidden-in-screenshot-mode"
             role="group"
             aria-label="Swimming controls"
-            sx={theme => ({
+            sx={(theme) => ({
                 position: "fixed",
                 left: "50%",
                 bottom: "max(16px, env(safe-area-inset-bottom))",
@@ -96,7 +109,7 @@ function TouchControls() {
                 p: 1,
                 zIndex: 10,
                 pointerEvents: "none",
-                [theme.breakpoints.up('md')]: {
+                [theme.breakpoints.up("md")]: {
                     right: "1rem",
                     left: "auto",
                     transform: "none",
@@ -106,7 +119,9 @@ function TouchControls() {
             {CONTROLS.map(({ action, label, Icon }) => (
                 <ArticlesButton
                     key={action}
-                    ref={(element) => { buttons.current[action] = element; }}
+                    ref={(element) => {
+                        buttons.current[action] = element;
+                    }}
                     aria-label={label}
                     aria-pressed={Boolean(controls[action])}
                     active={Boolean(controls[action])}
@@ -149,7 +164,9 @@ function TouchControls() {
                         userSelect: "none",
                         WebkitTouchCallout: "none",
                         filter: "drop-shadow(0 3px 5px rgba(0, 0, 0, 0.3))",
-                        "& .MuiSvgIcon-root": { fontSize: "clamp(24px, 5vw, 32px)" },
+                        "& .MuiSvgIcon-root": {
+                            fontSize: "clamp(24px, 5vw, 32px)",
+                        },
                     }}
                 >
                     <Icon />

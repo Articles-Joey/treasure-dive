@@ -8,7 +8,9 @@ export default function GameMusicHandler() {
     const musicRef = useRef(null);
     const status = useGameStore((state) => state.gameState.status);
     const enabled = useAudioStore((state) => state.audioSettings.enabled);
-    const musicVolume = useAudioStore((state) => state.audioSettings.music_volume);
+    const musicVolume = useAudioStore(
+        (state) => state.audioSettings.music_volume,
+    );
     const volume = Math.max(0, Math.min(1, Number(musicVolume) / 100)) || 0;
     const audible = enabled && volume > 0;
 

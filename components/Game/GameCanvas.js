@@ -111,12 +111,12 @@ function GameCanvas({ landingAnimationMode = false }) {
                                 onBoundsChange={setRockBounds}
                             />
 
-                            {!landingAnimationMode &&
+                            {!landingAnimationMode && (
                                 <>
                                     <PlayerBase cameraBounds={rockBounds} />
                                     <Players />
                                 </>
-                            }
+                            )}
 
                             <Obstacles />
 
@@ -155,8 +155,8 @@ function Wall({ height, position }) {
             <boxGeometry args={[1, height + 0.5, 1]} />
             <meshStandardMaterial
                 color="saddlebrown"
-            // transparent={true}
-            // opacity={0.5}
+                // transparent={true}
+                // opacity={0.5}
             />
         </mesh>
     );

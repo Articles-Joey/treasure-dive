@@ -25,7 +25,10 @@ export const useAudioStore = create()(
             playSound: async (filename) => {
                 const { enabled, game_volume } = get().audioSettings;
                 if (!enabled || typeof Audio === "undefined") return;
-                const volume = Math.max(0, Math.min(1, Number(game_volume) / 100));
+                const volume = Math.max(
+                    0,
+                    Math.min(1, Number(game_volume) / 100),
+                );
                 if (!Number.isFinite(volume) || volume === 0) return;
                 try {
                     const sound = new Audio(`/audio/${filename}`);

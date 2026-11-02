@@ -20,7 +20,10 @@ function SceneLighting() {
         <>
             {darkMode ? (
                 <>
-                    <color attach="background" args={[NIGHT_SKY_COLOR]} />
+                    <color
+                        attach="background"
+                        args={[NIGHT_SKY_COLOR]}
+                    />
                     <Stars
                         radius={100}
                         depth={35}

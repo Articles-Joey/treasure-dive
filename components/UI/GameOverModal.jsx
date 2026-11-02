@@ -108,11 +108,17 @@ export function SinglePlayerScoreboard({
                 }}
                 sx={{ mb: 1 }}
             >
-                <ToggleButton value="best" sx={{ gap: 1 }}>
+                <ToggleButton
+                    value="best"
+                    sx={{ gap: 1 }}
+                >
                     <EmojiEventsIcon fontSize="small" />
                     Best Scores
                 </ToggleButton>
-                <ToggleButton value="recent" sx={{ gap: 1 }}>
+                <ToggleButton
+                    value="recent"
+                    sx={{ gap: 1 }}
+                >
                     <HistoryIcon fontSize="small" />
                     Recent Scores
                 </ToggleButton>
@@ -208,7 +214,10 @@ export function SinglePlayerScoreboard({
                         sx={{ flex: 1, justifyContent: "flex-start" }}
                     >
                         {onClose && (
-                            <ArticlesButton onClick={onClose} startIcon={<CloseIcon />}>
+                            <ArticlesButton
+                                onClick={onClose}
+                                startIcon={<CloseIcon />}
+                            >
                                 Close
                             </ArticlesButton>
                         )}
@@ -223,7 +232,10 @@ export function SinglePlayerScoreboard({
                         </ArticlesButton>
                     </Stack>
                     {onPlayAgain && (
-                        <ArticlesButton onClick={onPlayAgain} startIcon={<ReplayIcon />}>
+                        <ArticlesButton
+                            onClick={onPlayAgain}
+                            startIcon={<ReplayIcon />}
+                        >
                             Play Again
                         </ArticlesButton>
                     )}
@@ -303,7 +315,10 @@ export function MultiplayerScoreboard({
                     direction="row"
                     spacing={1}
                 >
-                    <ArticlesButton onClick={onClose} startIcon={<CloseIcon />}>
+                    <ArticlesButton
+                        onClick={onClose}
+                        startIcon={<CloseIcon />}
+                    >
                         Close
                     </ArticlesButton>
                     <ArticlesButton

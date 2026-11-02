@@ -12,6 +12,7 @@ import DarkModeHandler from "@articles-media/articles-dev-box/DarkModeHandler";
 import GlobalBody from "@articles-media/articles-dev-box/GlobalBody";
 import ToontownModeHandler from "@articles-media/articles-dev-box/ToontownModeHandler";
 import GlobalClientModals from "@articles-media/articles-dev-box/GlobalClientModals";
+import getAssetSource from "@articles-media/articles-dev-box/getAssetSource";
 import HotkeyHandler from "@articles-media/articles-dev-box/HotkeyHandler";
 
 export default function LayoutClient({ children }) {
@@ -47,25 +48,25 @@ export default function LayoutClient({ children }) {
                                 sliders: [
                                     ...(useAudioStore.getState().audioSettings
                                         ? Object.keys(
-                                              useAudioStore.getState()
-                                                  .audioSettings,
-                                          )
-                                              .filter(
-                                                  (key) => key !== "enabled",
-                                              )
-                                              .map((key) => ({
-                                                  key,
-                                                  label: key
-                                                      .split("_")
-                                                      .map(
-                                                          (word) =>
-                                                              word
-                                                                  .charAt(0)
-                                                                  .toUpperCase() +
-                                                              word.slice(1),
-                                                      )
-                                                      .join(" "),
-                                              }))
+                                            useAudioStore.getState()
+                                                .audioSettings,
+                                        )
+                                            .filter(
+                                                (key) => key !== "enabled",
+                                            )
+                                            .map((key) => ({
+                                                key,
+                                                label: key
+                                                    .split("_")
+                                                    .map(
+                                                        (word) =>
+                                                            word
+                                                                .charAt(0)
+                                                                .toUpperCase() +
+                                                            word.slice(1),
+                                                    )
+                                                    .join(" "),
+                                            }))
                                         : []),
                                 ],
                             },
@@ -93,8 +94,10 @@ export default function LayoutClient({ children }) {
                     }}
                     infoModalConfig={{
                         previewImage: darkMode
-                            ? "img/previews/start-dark.webp"
-                            : "img/previews/start.webp",
+                            ? getAssetSource("img/previews/start-dark.webp")
+                            : getAssetSource("img/previews/start.webp"),
+                            // ? "img/previews/start-dark.webp"
+                            // : "img/previews/start.webp",
                         appendContent: <></>,
                     }}
                 />

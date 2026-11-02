@@ -8,7 +8,9 @@ import { useGameStore } from "@/hooks/useGameStore";
 const MAP_TOP_OFFSET_PERCENT = 10;
 
 function getMapTop(y) {
-    return MAP_TOP_OFFSET_PERCENT + (y / -29.5) * (100 - MAP_TOP_OFFSET_PERCENT);
+    return (
+        MAP_TOP_OFFSET_PERCENT + (y / -29.5) * (100 - MAP_TOP_OFFSET_PERCENT)
+    );
 }
 
 function Minimap() {
@@ -18,7 +20,9 @@ function Minimap() {
     useLayoutEffect(() => {
         const updateMarker = ({ playerLocation }) => {
             if (!playerMarker.current) return;
-            const left = playerLocation ? ((playerLocation.x + 6.5) / 13) * 100 : 0;
+            const left = playerLocation
+                ? ((playerLocation.x + 6.5) / 13) * 100
+                : 0;
             const top = getMapTop(playerLocation ? playerLocation.y : 0);
             playerMarker.current.style.left = `clamp(7px, ${left}%, calc(100% - 7px))`;
             playerMarker.current.style.top = `clamp(7px, ${top}%, calc(100% - 7px))`;
@@ -26,7 +30,8 @@ function Minimap() {
         updateMarker(useGameStore.getState());
         // Move only the marker; don't rerender the map and all chest markers.
         return useGameStore.subscribe((state, previous) => {
-            if (state.playerLocation !== previous.playerLocation) updateMarker(state);
+            if (state.playerLocation !== previous.playerLocation)
+                updateMarker(state);
         });
     }, []);
 
@@ -59,7 +64,14 @@ function Minimap() {
                 },
             }}
         >
-            <Box sx={{ position: "relative", width: 200, maxWidth: "100%", mx: "auto" }}>
+            <Box
+                sx={{
+                    position: "relative",
+                    width: 200,
+                    maxWidth: "100%",
+                    mx: "auto",
+                }}
+            >
                 <Box
                     component="img"
                     src={`${process.env.NEXT_PUBLIC_CDN}games/Treasure Dive/treasure-dive-toontown-map.jpg`}

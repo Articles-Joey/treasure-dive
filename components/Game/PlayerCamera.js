@@ -11,14 +11,20 @@ export default function PlayerCamera({ positionRef, bounds }) {
     const cameraMode = useStore((state) => state.cameraMode);
 
     useFrame(() => {
-        if (cameraMode !== "Player" || !camera.isPerspectiveCamera || size.width <= 0 || size.height <= 0) return;
+        if (
+            cameraMode !== "Player" ||
+            !camera.isPerspectiveCamera ||
+            size.width <= 0 ||
+            size.height <= 0
+        )
+            return;
 
         const minX = bounds?.min[0] ?? -(BOARD_WIDTH / 2 + 2);
         const maxX = bounds?.max[0] ?? BOARD_WIDTH / 2 + 2;
         const frontZ = bounds?.max[2] ?? 1.5;
         const centerX = (minX + maxX) / 2;
         const aspect = size.width / size.height;
-        const tanHalfFov = Math.tan(camera.getEffectiveFOV() * Math.PI / 360);
+        const tanHalfFov = Math.tan((camera.getEffectiveFOV() * Math.PI) / 360);
         const playerZ = positionRef.current[2];
 
         // Fit the nearest face of the rocks' world bounds horizontally.
@@ -29,9 +35,13 @@ export default function PlayerCamera({ positionRef, bounds }) {
         );
         const halfViewHeight = (cameraZ - playerZ) * tanHalfFov;
         const boardHalfHeight = (BOARD_HEIGHT + WATER_SURFACE_Y) / 2;
-        const cameraY = halfViewHeight >= boardHalfHeight + SEABED_MARGIN
-            ? (WATER_SURFACE_Y - BOARD_HEIGHT) / 2
-            : Math.max(positionRef.current[1], -BOARD_HEIGHT + halfViewHeight - SEABED_MARGIN);
+        const cameraY =
+            halfViewHeight >= boardHalfHeight + SEABED_MARGIN
+                ? (WATER_SURFACE_Y - BOARD_HEIGHT) / 2
+                : Math.max(
+                      positionRef.current[1],
+                      -BOARD_HEIGHT + halfViewHeight - SEABED_MARGIN,
+                  );
 
         const requiredFar = cameraZ - (bounds?.min[2] ?? -5) + BOARD_HEIGHT * 2;
         if (requiredFar > camera.far) {

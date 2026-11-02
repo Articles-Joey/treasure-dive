@@ -110,8 +110,8 @@ importers:
   .:
     dependencies:
       '@articles-media/articles-dev-box':
-        specifier: 2.4.0
-        version: 2.4.0(b4f8e49679e2666dce2e3f1428017b80)
+        specifier: 2.4.1
+        version: 2.4.1(b4f8e49679e2666dce2e3f1428017b80)
       '@articles-media/articles-gamepad-helper':
         specifier: ^0.0.13
         version: 0.0.13(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(zustand@5.0.15(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.7.0(react@19.3.1)))
@@ -209,8 +209,8 @@ importers:
 
 packages:
 
-  '@articles-media/articles-dev-box@2.4.0':
-    resolution: {integrity: sha512-MrMxKz14qtbhaGL4L4u7ijzvoLZCW8+BbUy4yonxuTFK/WdDPICJacsOztAbF8UMSaxtlqJ2KJPYlkDpeASLjg==}
+  '@articles-media/articles-dev-box@2.4.1':
+    resolution: {integrity: sha512-tgk0a96hLowmPvdxyRJP4SnTwiLZvH4HhlI84DBjEWNchAbuRLuNw5gYi5DjenN4m34SRwwDsG6fLAownLmIFQ==}
     peerDependencies:
       '@emotion/cache': ^11.14.0
       '@emotion/react': ^11.14.0
@@ -2643,7 +2643,7 @@ packages:
 
 snapshots:
 
-  '@articles-media/articles-dev-box@2.4.0(b4f8e49679e2666dce2e3f1428017b80)':
+  '@articles-media/articles-dev-box@2.4.1(b4f8e49679e2666dce2e3f1428017b80)':
     dependencies:
       '@emotion/cache': 11.14.0
       '@emotion/react': 11.14.0(@types/react@19.3.0)(react@19.3.1)(supports-color@7.2.0)

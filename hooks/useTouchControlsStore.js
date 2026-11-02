@@ -2,7 +2,13 @@
 import { persist } from "zustand/middleware";
 import { createWithEqualityFn as create } from "zustand/traditional";
 
-const EMPTY_CONTROLS = { jump: false, left: false, right: false, up: false, down: false };
+const EMPTY_CONTROLS = {
+    jump: false,
+    left: false,
+    right: false,
+    up: false,
+    down: false,
+};
 
 const useTouchControlsStore = create()(
     persist(
@@ -27,7 +33,8 @@ const useTouchControlsStore = create()(
                     touchControls: { ...prev.touchControls, ...newValue },
                 }));
             },
-            resetTouchControls: () => set({ touchControls: { ...EMPTY_CONTROLS } }),
+            resetTouchControls: () =>
+                set({ touchControls: { ...EMPTY_CONTROLS } }),
         }),
         {
             name: "touch-controls-store",

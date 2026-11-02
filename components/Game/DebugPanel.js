@@ -135,7 +135,10 @@ function DebugPanel() {
                         <MenuItem
                             key={label}
                             onClick={() => {
-                                if (debug) useGameStore.getState().setTeleport([0, y, 0]);
+                                if (debug)
+                                    useGameStore
+                                        .getState()
+                                        .setTeleport([0, y, 0]);
                                 setTeleportAnchor(null);
                             }}
                         >
