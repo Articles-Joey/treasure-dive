@@ -16,6 +16,13 @@ import ArticlesButton from "@/components/UI/Button";
 
 import { useGameStore } from "@/hooks/useGameStore";
 import { useStore } from "@/hooks/useStore";
+import { BOARD_HEIGHT, WATER_SURFACE_Y } from "./board";
+
+const TELEPORT_DESTINATIONS = [
+    { label: "Top", y: WATER_SURFACE_Y - 0.25 },
+    { label: "Middle", y: -BOARD_HEIGHT / 2 },
+    { label: "Bottom", y: -BOARD_HEIGHT + 0.5 },
+];
 
 function DebugPanel() {
     const score = useGameStore((state) => state.score);
@@ -30,6 +37,7 @@ function DebugPanel() {
     const setCameraMode = useStore((state) => state.setCameraMode);
     const [debugAnchor, setDebugAnchor] = useState(null);
     const [cameraAnchor, setCameraAnchor] = useState(null);
+    const [teleportAnchor, setTeleportAnchor] = useState(null);
 
     return (
         <Card
@@ -101,13 +109,40 @@ function DebugPanel() {
                     ))}
                 </Menu>
                 <ArticlesButton
+                    id="teleport-menu-button"
                     small
                     sx={{ width: "50%" }}
                     startIcon={<RocketLaunchIcon />}
-                    onClick={() => {}}
+                    disabled={!debug}
+                    aria-haspopup="menu"
+                    aria-controls={teleportAnchor ? "teleport-menu" : undefined}
+                    aria-expanded={Boolean(teleportAnchor)}
+                    onClick={(event) => setTeleportAnchor(event.currentTarget)}
                 >
                     Teleport
                 </ArticlesButton>
+                <Menu
+                    id="teleport-menu"
+                    anchorEl={teleportAnchor}
+                    open={debug && Boolean(teleportAnchor)}
+                    onClose={() => setTeleportAnchor(null)}
+                    slotProps={{
+                        list: { "aria-labelledby": "teleport-menu-button" },
+                        paper: { sx: { width: 200 } },
+                    }}
+                >
+                    {TELEPORT_DESTINATIONS.map(({ label, y }) => (
+                        <MenuItem
+                            key={label}
+                            onClick={() => {
+                                if (debug) useGameStore.getState().setTeleport([0, y, 0]);
+                                setTeleportAnchor(null);
+                            }}
+                        >
+                            {label}
+                        </MenuItem>
+                    ))}
+                </Menu>
                 <ArticlesButton
                     id="camera-menu-button"
                     small

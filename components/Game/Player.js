@@ -42,8 +42,6 @@ function clampPlayerY(y) {
     return Math.max(MIN_PLAYER_Y, Math.min(y, MAX_PLAYER_Y));
 }
 
-let lastLocation;
-
 function myToFixed(i, digits) {
     var pow = Math.pow(10, digits);
 
@@ -73,7 +71,6 @@ function PlayerBase(props) {
         shift,
         setShift,
         addDistance,
-        rotation,
         setRotation,
         holdingChest,
         setHoldingChest,
@@ -89,7 +86,6 @@ function PlayerBase(props) {
             shift: state.shift,
             setShift: state.setShift,
             addDistance: state.addDistance,
-            rotation: state.rotation,
             setRotation: state.setRotation,
             holdingChest: state.holdingChest,
             setHoldingChest: state.setHoldingChest,
@@ -105,7 +101,9 @@ function PlayerBase(props) {
     const touchLeft = useTouchControlsStore((state) => state.enabled && state.touchControls.left);
     const touchRight = useTouchControlsStore((state) => state.enabled && state.touchControls.right);
 
-    const { controllerState, setControllerState } = useControllerStore();
+    const controllerAxisX = useControllerStore(
+        (state) => state.controllerState.axes?.[0] ?? 0,
+    );
 
     // const [character, setCharacter] = useLocalStorageNew("game:ocean-rings:character", {
     //     model: 'Clownfish',
@@ -114,14 +112,14 @@ function PlayerBase(props) {
 
     // Attach event listeners when the component mounts
     useEffect(() => {
-        if (controllerState.axes && Math.abs(controllerState?.axes[0]) > 0.3) {
-            if (controllerState?.axes[0] > 0) {
+        if (Math.abs(controllerAxisX) > 0.3) {
+            if (controllerAxisX > 0) {
                 api.position.set(-1, MAX_PLAYER_Y, 0);
             } else {
                 api.position.set(1, MAX_PLAYER_Y, 0);
             }
         }
-    }, [controllerState]);
+    }, [controllerAxisX]);
 
     useEffect(() => {
         if (teleport) {
@@ -219,6 +217,7 @@ function PlayerBase(props) {
     }, [api.velocity]);
 
     const pos = useRef([0, 0, 0]);
+    const movementDirection = useRef(new Vector3());
     const playerModelRef = useRef();
     const nicknameRef = useRef();
     const stunnedRef = useRef(false);
@@ -388,12 +387,14 @@ function PlayerBase(props) {
 
         // console.log(posX)
 
-        let newLocation = new Vector3(posX, posY, posZ);
-
-        if (JSON.stringify(lastLocation) !== JSON.stringify(newLocation)) {
-            // console.log(newLocation, lastLocation)
-            setPlayerLocation(newLocation);
-            lastLocation = newLocation;
+        const lastLocation = useGameStore.getState().playerLocation;
+        if (
+            !lastLocation ||
+            lastLocation.x !== posX ||
+            lastLocation.y !== posY ||
+            lastLocation.z !== posZ
+        ) {
+            setPlayerLocation(new Vector3(posX, posY, posZ));
         }
         // else {
         //     console.log("location unchanged")
@@ -405,7 +406,7 @@ function PlayerBase(props) {
 
         if (currentStatus === "In Progress" || gameOver) {
             if ((!stunnedRef.current || gameOver) && moveForward) {
-                const direction = new Vector3();
+                const direction = movementDirection.current;
                 const moveSpeed = SPEED * (shift && sprintEnabled ? 2 : 0.5);
                 const rad = degToRad(rotationRef.current);
                 // Calculate the direction vector based on rotation
@@ -462,14 +463,27 @@ function PlayerBase(props) {
         };
     }, []);
 
-    const rotationRef = useRef(rotation);
+    const rotationRef = useRef(useGameStore.getState().rotation);
     useEffect(() => {
-        rotationRef.current = rotation;
-        api.rotation.set(0, 0, degToRad(rotation));
-        if (playerModelRef.current) {
-            playerModelRef.current.rotation.z = degToRad(rotation);
-        }
-    }, [rotation, api.rotation]);
+        const applyRotation = (rotation) => {
+            rotationRef.current = rotation;
+            api.rotation.set(0, 0, degToRad(rotation));
+            if (playerModelRef.current) {
+                playerModelRef.current.rotation.z = degToRad(rotation);
+            }
+        };
+        applyRotation(useGameStore.getState().rotation);
+        return useGameStore.subscribe((state, previous) => {
+            // Turning already updates the body and model in useFrame. Only
+            // apply rotations coming from elsewhere, such as a round reset.
+            if (
+                state.rotation !== previous.rotation &&
+                state.rotation !== rotationRef.current
+            ) {
+                applyRotation(state.rotation);
+            }
+        });
+    }, [api.rotation]);
 
     const hasHeldChest = useGameStore(
         (state) =>

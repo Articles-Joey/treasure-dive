@@ -1,5 +1,7 @@
 "use client";
 
+import { useLayoutEffect, useRef } from "react";
+import { shallow } from "zustand/shallow";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -81,10 +83,25 @@ export default function GameDetailsPanel() {
     );
 }
 
+function samePlayerDetails(previous, next) {
+    if (previous === next) return true;
+    if (!previous || !next || previous.length !== next.length) return false;
+    return previous.every((player, index) => {
+        const other = next[index];
+        return (
+            player.id === other.id &&
+            player.nickname === other.nickname &&
+            player.score === other.score &&
+            shallow(player.heldChests, other.heldChests)
+        );
+    });
+}
+
 function Players() {
-    const players = useGameStore((state) => state.gameState.players);
-    const rotation = useGameStore((state) => state.rotation);
-    const socketId = useSocketStore((state) => state.socket?.id);
+    const players = useGameStore(
+        (state) => state.gameState.players,
+        samePlayerDetails,
+    );
 
     return (
         <Box
@@ -150,26 +167,54 @@ function Players() {
                             }}
                         />
                     </Box>
-                    <Box
-                        sx={{
-                            fontSize: "0.65rem",
-                            lineHeight: 1.4,
-                            fontVariantNumeric: "tabular-nums",
-                        }}
-                    >
-                        X: {player.position?.[0]?.toFixed(2) || 0} | Y:{" "}
-                        {player.position?.[1]?.toFixed(2) || 0} | Z:{" "}
-                        {player.position?.[2]?.toFixed(2) || 0} | Rotation:{" "}
-                        {(player.id === "local" || player.id === socketId
-                            ? rotation
-                            : Number.isFinite(player.rotation)
-                              ? player.rotation
-                              : 0
-                        ).toFixed(1)}
-                        °
-                    </Box>
+                    <PlayerCoordinates playerId={player.id} />
                 </Box>
             ))}
         </Box>
+    );
+}
+
+function PlayerCoordinates({ playerId }) {
+    const coordinates = useRef(null);
+    const socketId = useSocketStore((state) => state.socket?.id);
+
+    useLayoutEffect(() => {
+        const isLocal = playerId === "local" || playerId === socketId;
+        let previousText;
+        const updateCoordinates = (state) => {
+            const player = state.gameState.players?.find((p) => p.id === playerId);
+            const rotation = isLocal
+                ? state.rotation
+                : Number.isFinite(player?.rotation)
+                  ? player.rotation
+                  : 0;
+            const position = player?.position;
+            const text = `X: ${position?.[0]?.toFixed(2) || 0} | Y: ${position?.[1]?.toFixed(2) || 0} | Z: ${position?.[2]?.toFixed(2) || 0} | Rotation: ${rotation.toFixed(1)}°`;
+            if (coordinates.current && text !== previousText) {
+                coordinates.current.textContent = text;
+                previousText = text;
+            }
+        };
+        updateCoordinates(useGameStore.getState());
+        // Keep live coordinates without rerendering every MUI player row.
+        return useGameStore.subscribe((state, previous) => {
+            if (
+                state.gameState.players !== previous.gameState.players ||
+                (isLocal && state.rotation !== previous.rotation)
+            ) {
+                updateCoordinates(state);
+            }
+        });
+    }, [playerId, socketId]);
+
+    return (
+        <Box
+            ref={coordinates}
+            sx={{
+                fontSize: "0.65rem",
+                lineHeight: 1.4,
+                fontVariantNumeric: "tabular-nums",
+            }}
+        />
     );
 }

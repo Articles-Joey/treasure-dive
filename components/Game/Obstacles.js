@@ -95,34 +95,15 @@ function Obstacle({ position, rowDirection }) {
     }));
 
     const speed = 2; // Speed of movement
-    const direction = useRef(rowDirection); // 1 for forward, -1 for backward
-    const [currentX, setCurrentX] = useState(position[0]); // Starting X position
+    const currentX = useRef(position[0]);
 
     useFrame(() => {
         if (useGameStore.getState().gameState.status === "Game Over") return;
-        let newX;
+        currentX.current -= rowDirection * speed * 0.02;
+        if (rowDirection > 0 && currentX.current <= -10) currentX.current = 10;
+        if (rowDirection < 0 && currentX.current >= 10) currentX.current = -10;
 
-        if (rowDirection > 0) {
-            newX = currentX - direction.current * speed * 0.02; // Update position (scale time)
-
-            setCurrentX(newX);
-
-            if (newX <= -10) {
-                api.position.set(10, position[1], position[2]);
-                setCurrentX(10);
-            }
-        } else {
-            newX = currentX - direction.current * speed * 0.02; // Update position (scale time)
-
-            setCurrentX(newX);
-
-            if (newX >= 10) {
-                api.position.set(-10, position[1], position[2]);
-                setCurrentX(-10);
-            }
-        }
-
-        api.position.set(newX, position[1], position[2]); // Apply the new X position
+        api.position.set(currentX.current, position[1], position[2]);
     });
 
     return (

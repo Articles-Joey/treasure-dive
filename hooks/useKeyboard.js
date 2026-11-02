@@ -35,8 +35,10 @@ export const useKeyboard = () => {
         // console.log("test")
         if (action) {
             if (e.code.startsWith("Arrow")) e.preventDefault();
+            if (pressedKeys.current.has(e.code)) return;
             pressedKeys.current.add(e.code);
             setActions((prev) => {
+                if (prev[action]) return prev;
                 return {
                     ...prev,
                     [action]: true,
@@ -55,6 +57,7 @@ export const useKeyboard = () => {
                 (key) => actionByKey(key) === action,
             );
             setActions((prev) => {
+                if (prev[action] === stillPressed) return prev;
                 return {
                     ...prev,
                     [action]: stillPressed,

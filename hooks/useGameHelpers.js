@@ -144,6 +144,17 @@ export default function useGameHelpers() {
             const gameState = useGameStore.getState().gameState;
             if (!gameState?.players) return;
 
+            const localPlayer = gameState.players.find(
+                (player) => player.id === "local",
+            );
+            if (
+                !localPlayer ||
+                newPosition.every(
+                    (value, index) => value === localPlayer.position?.[index],
+                )
+            )
+                return;
+
             const newPlayers = gameState.players.map((player) => {
                 if (player.id === "local") {
                     return { ...player, position: newPosition };

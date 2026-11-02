@@ -1,4 +1,5 @@
 "use client";
+import { useLayoutEffect, useRef } from "react";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import { useGameStore } from "@/hooks/useGameStore";
@@ -11,15 +12,23 @@ function getMapTop(y) {
 }
 
 function Minimap() {
-    const playerLocation = useGameStore((state) => state.playerLocation);
+    const playerMarker = useRef(null);
     const chests = useGameStore((state) => state.gameState.chests);
 
-    // Range: x (-6.5 to 6.5), y (0 to -29.5)
-    // Map to percentage:
-    // left = ((x + 6.5) / 13) * 100
-    // The play area fills the image below MAP_TOP_OFFSET_PERCENT.
-    const left = playerLocation ? ((playerLocation.x + 6.5) / 13) * 100 : 0;
-    const top = getMapTop(playerLocation ? playerLocation.y : 0);
+    useLayoutEffect(() => {
+        const updateMarker = ({ playerLocation }) => {
+            if (!playerMarker.current) return;
+            const left = playerLocation ? ((playerLocation.x + 6.5) / 13) * 100 : 0;
+            const top = getMapTop(playerLocation ? playerLocation.y : 0);
+            playerMarker.current.style.left = `clamp(7px, ${left}%, calc(100% - 7px))`;
+            playerMarker.current.style.top = `clamp(7px, ${top}%, calc(100% - 7px))`;
+        };
+        updateMarker(useGameStore.getState());
+        // Move only the marker; don't rerender the map and all chest markers.
+        return useGameStore.subscribe((state, previous) => {
+            if (state.playerLocation !== previous.playerLocation) updateMarker(state);
+        });
+    }, []);
 
     // Helper to convert chest position array to minimap coordinates
     function getChestCoords(posArr) {
@@ -70,10 +79,9 @@ function Minimap() {
                 />
                 {/* Player marker */}
                 <Box
+                    ref={playerMarker}
                     sx={{
                         position: "absolute",
-                        left: `clamp(7px, ${left}%, calc(100% - 7px))`,
-                        top: `clamp(7px, ${top}%, calc(100% - 7px))`,
                         width: "10px",
                         height: "10px",
                         backgroundColor: "red",
